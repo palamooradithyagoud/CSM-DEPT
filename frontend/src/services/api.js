@@ -279,6 +279,59 @@ export const api = {
     const res = await request(`/analytics/grades${query ? `?${query}` : ''}`);
     return res.data;
   },
+
+  // ==========================================
+  // PHASE 4: PROBLEM IDENTIFICATION & INSIGHTS
+  // ==========================================
+
+  getInsightsOverview: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/insights/overview${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
+  getStudentWatchlist: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/insights/students${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
+  getStudentInsights: async (studentId, semesterId) => {
+    const query = semesterId ? `?semester_id=${semesterId}` : '';
+    const res = await request(`/insights/students/${studentId}${query}`);
+    return res.data;
+  },
+
+  getSubjectInsights: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/insights/subjects${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
+  getSectionInsights: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/insights/sections${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
+  getInsightsConfig: async () => {
+    const res = await request('/insights/config');
+    return res.data;
+  },
+
+  updateInsightsConfig: async (payload) => {
+    const res = await request('/insights/config', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    return res.data;
+  },
+
+  getEntityRecommendations: async (entityType, entityId, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/insights/recommendations/${entityType}/${entityId}${query ? `?${query}` : ''}`);
+    return res.data;
+  },
 };
 
 

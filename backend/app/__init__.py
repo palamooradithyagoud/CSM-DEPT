@@ -7,6 +7,7 @@ from app.api.public_bp import public_bp
 from app.api.academic_bp import academic_bp
 from app.api.uploads_bp import uploads_bp
 from app.api.analytics_bp import analytics_bp
+from app.api.insights_bp import insights_bp
 from app.utils.response import api_error, api_response
 
 
@@ -50,6 +51,7 @@ def create_app(config_name=None):
     app.register_blueprint(academic_bp)
     app.register_blueprint(uploads_bp)
     app.register_blueprint(analytics_bp)
+    app.register_blueprint(insights_bp)
 
 
 

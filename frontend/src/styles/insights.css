@@ -1,0 +1,402 @@
+/* =========================================================
+   PHASE 4: ACADEMIC PROBLEM IDENTIFICATION & INSIGHTS STYLES
+   Design System: Institutional Academic Dark (#050506 / #0F0F11)
+   ========================================================= */
+
+.academic-insights-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* --- Severity Badges & Themes --- */
+.badge-critical {
+  background: rgba(255, 98, 104, 0.15);
+  color: #FF6268;
+  border: 1px solid rgba(255, 98, 104, 0.4);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.badge-high {
+  background: rgba(255, 152, 0, 0.15);
+  color: #FF9800;
+  border: 1px solid rgba(255, 152, 0, 0.4);
+  font-weight: 700;
+}
+
+.badge-medium {
+  background: rgba(255, 193, 7, 0.15);
+  color: #FFC107;
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  font-weight: 600;
+}
+
+.badge-low {
+  background: rgba(74, 144, 226, 0.15);
+  color: #4A90E2;
+  border: 1px solid rgba(74, 144, 226, 0.4);
+}
+
+.badge-info {
+  background: rgba(255, 255, 255, 0.08);
+  color: #A0A0A5;
+  border: 1px solid #242426;
+}
+
+/* --- Summary KPI Grid --- */
+.insights-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.insight-kpi-card {
+  padding: 1.25rem;
+  border-radius: 8px;
+  background: #0F0F11;
+  border: 1px solid #242426;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.insight-kpi-card:hover {
+  border-color: #38383C;
+}
+
+.insight-kpi-card.border-critical {
+  border-left: 3px solid #FF6268;
+}
+
+.insight-kpi-card.border-high {
+  border-left: 3px solid #FF9800;
+}
+
+.insight-kpi-card.border-medium {
+  border-left: 3px solid #FFC107;
+}
+
+.insight-kpi-card.border-success {
+  border-left: 3px solid #32DC5C;
+}
+
+.kpi-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kpi-title {
+  font-size: 0.8rem;
+  color: #8E8E93;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.kpi-big-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.kpi-footer-note {
+  font-size: 0.75rem;
+  color: #6C6C70;
+}
+
+/* --- Watchlist Table & Cards --- */
+.watchlist-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.severity-filter-group {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.sev-pill {
+  background: #141416;
+  border: 1px solid #242426;
+  color: #8E8E93;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.sev-pill:hover {
+  background: #1C1C20;
+  color: #FFFFFF;
+}
+
+.sev-pill.active {
+  background: #242426;
+  color: #FFFFFF;
+  border-color: #38383C;
+}
+
+.sev-pill.active.critical {
+  background: rgba(255, 98, 104, 0.2);
+  color: #FF6268;
+  border-color: #FF6268;
+}
+
+.sev-pill.active.high {
+  background: rgba(255, 152, 0, 0.2);
+  color: #FF9800;
+  border-color: #FF9800;
+}
+
+.watchlist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.825rem;
+}
+
+.watchlist-table th {
+  background: #141416;
+  color: #8E8E93;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #242426;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.watchlist-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #1C1C20;
+  vertical-align: middle;
+}
+
+.watchlist-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.signal-tags-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.signal-tag {
+  background: #18181C;
+  border: 1px solid #28282C;
+  color: #C0C0C5;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-family: monospace;
+}
+
+/* --- Student Diagnostic Detail Modal / Drawer --- */
+.diagnostic-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.diagnostic-drawer {
+  width: 620px;
+  max-width: 95vw;
+  height: 100%;
+  background: #0B0B0D;
+  border-left: 1px solid #242426;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.drawer-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #242426;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0F0F11;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.drawer-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Diagnostic Card Blocks */
+.diagnostic-signal-card {
+  background: #121215;
+  border: 1px solid #242426;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.diagnostic-signal-card.critical {
+  border-left: 3px solid #FF6268;
+}
+
+.diagnostic-signal-card.high {
+  border-left: 3px solid #FF9800;
+}
+
+.diagnostic-signal-card.medium {
+  border-left: 3px solid #FFC107;
+}
+
+.signal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.signal-card-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.signal-card-reason {
+  font-size: 0.8rem;
+  color: #D0D0D5;
+  line-height: 1.4;
+}
+
+.signal-card-evidence {
+  background: #09090A;
+  border: 1px solid #1C1C20;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: #A0A0A5;
+}
+
+/* Recommendations List */
+.recommendations-box {
+  background: #101014;
+  border: 1px solid #242426;
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.recommendations-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #32DC5C;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rec-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #1C1C20;
+}
+
+.rec-item:last-child {
+  border-bottom: none;
+}
+
+.rec-content h5 {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 0.2rem;
+}
+
+.rec-content p {
+  font-size: 0.75rem;
+  color: #9A9AA0;
+  line-height: 1.35;
+}
+
+/* AI Synthesis Box */
+.ai-synthesis-box {
+  background: rgba(50, 220, 92, 0.04);
+  border: 1px solid rgba(50, 220, 92, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.ai-synthesis-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #32DC5C;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
+}
+
+.ai-synthesis-text {
+  font-size: 0.8rem;
+  color: #D5D5DA;
+  line-height: 1.45;
+}
+
+.ai-disclaimer {
+  font-size: 0.7rem;
+  color: #6C6C70;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+/* --- Config Thresholds Drawer / Table --- */
+.thresholds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.threshold-card {
+  background: #121215;
+  border: 1px solid #242426;
+  border-radius: 6px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.threshold-label {
+  font-size: 0.8rem;
+  color: #C0C0C5;
+  font-weight: 500;
+}
+
+.threshold-val {
+  font-family: monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #32DC5C;
+}

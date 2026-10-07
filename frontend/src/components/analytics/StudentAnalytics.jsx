@@ -21,6 +21,7 @@ export default function StudentAnalytics({ studentId: initialStudentId, onClose 
   const [isSearching, setIsSearching] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(initialStudentId || null);
   const [studentData, setStudentData] = useState(null);
+  const [studentInsights, setStudentInsights] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -34,9 +35,13 @@ export default function StudentAnalytics({ studentId: initialStudentId, onClose 
     if (!selectedStudentId) return;
     setLoading(true);
     setError(null);
-    api.getStudentAnalytics(selectedStudentId)
-      .then((data) => {
-        setStudentData(data);
+    Promise.all([
+      api.getStudentAnalytics(selectedStudentId),
+      api.getStudentInsights(selectedStudentId).catch(() => null),
+    ])
+      .then(([analyticsData, insightsData]) => {
+        setStudentData(analyticsData);
+        setStudentInsights(insightsData);
         setLoading(false);
       })
       .catch((err) => {
@@ -204,6 +209,61 @@ export default function StudentAnalytics({ studentId: initialStudentId, onClose 
               </div>
             </div>
           </div>
+
+          {/* Academic Attention & Diagnostic Insights (Phase 4) */}
+          {studentInsights && studentInsights.requires_attention && (
+            <div className={`card mb-6 diagnostic-signal-card ${studentInsights.severity.toLowerCase()}`}>
+              <div className="signal-card-header mb-2">
+                <div className="flex items-center gap-2">
+                  <AlertCircle size={18} className={studentInsights.severity === 'CRITICAL' ? 'text-danger' : 'text-warning'} />
+                  <h3 className="text-white font-bold text-base">Academic Attention Diagnostic</h3>
+                </div>
+                <span className={`badge badge-${studentInsights.severity.toLowerCase()} text-xs font-bold`}>
+                  {studentInsights.severity} PRIORITY
+                </span>
+              </div>
+
+              {/* Reasons */}
+              <div className="my-2">
+                <span className="text-xs font-semibold text-muted block mb-1">Identified Attention Reasons:</span>
+                <ul className="text-xs text-white space-y-1 pl-4 list-disc">
+                  {studentInsights.primary_reasons?.map((reason, idx) => (
+                    <li key={idx}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Recommendations */}
+              {studentInsights.recommendations && studentInsights.recommendations.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-neutral-800">
+                  <span className="text-xs font-semibold text-primary block mb-1 font-mono uppercase tracking-wide">
+                    Departmental Recommendations:
+                  </span>
+                  <div className="space-y-1.5">
+                    {studentInsights.recommendations.map((rec, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs">
+                        <CheckCircle2 size={13} className="text-primary mt-0.5 shrink-0" />
+                        <div>
+                          <strong className="text-white">{rec.title}:</strong>{' '}
+                          <span className="text-muted">{rec.description}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* AI-Assisted Synthesis */}
+              {studentInsights.ai_explanation && (
+                <div className="mt-3 p-2.5 rounded bg-neutral-900 border border-neutral-800 text-xs">
+                  <span className="text-primary font-semibold block mb-0.5 font-mono">
+                    Diagnostic Summary:
+                  </span>
+                  <p className="text-muted leading-relaxed">{studentInsights.ai_explanation}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 1. CGPA & SGPA Progression Trajectory */}
           <div className="card mb-6">

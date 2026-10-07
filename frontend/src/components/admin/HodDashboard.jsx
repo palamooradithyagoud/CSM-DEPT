@@ -12,6 +12,7 @@ import {
   Layers,
   CheckCircle2,
   BarChart3,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -21,6 +22,7 @@ import StudentDirectory from './StudentDirectory';
 import SubjectManager from './SubjectManager';
 import UploadHistoryView from './UploadHistoryView';
 import AcademicAnalytics from '../analytics/AcademicAnalytics';
+import AcademicInsights from '../insights/AcademicInsights';
 
 export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }) {
   const { user, logout } = useAuth();
@@ -94,6 +96,17 @@ export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }
           >
             <BarChart3 size={16} />
             <span>Academic Analytics</span>
+          </button>
+
+          <button
+            className={`nav-tab-btn ${activeTab === 'insights' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('insights');
+              window.location.hash = '#hod/insights';
+            }}
+          >
+            <AlertTriangle size={16} />
+            <span>Academic Insights</span>
           </button>
 
           <button
@@ -196,6 +209,10 @@ export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }
 
         {activeTab === 'analytics' && (
           <AcademicAnalytics batches={batches} />
+        )}
+
+        {activeTab === 'insights' && (
+          <AcademicInsights batches={batches} />
         )}
 
         {activeTab === 'upload' && (
