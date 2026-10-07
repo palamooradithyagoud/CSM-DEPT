@@ -34,6 +34,38 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
+/**
+ * Downloads binary or attachment file from API with bearer authentication
+ */
+async function downloadFile(endpoint, defaultFilename = 'report') {
+  const token = localStorage.getItem('dept_access_token');
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  const response = await fetch(`${API_BASE}${endpoint}`, { headers });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: `Export failed with status ${response.status}` }));
+    throw new Error(errorData.message || 'Export failed');
+  }
+
+  let filename = defaultFilename;
+  const disposition = response.headers.get('Content-Disposition');
+  if (disposition && disposition.includes('filename=')) {
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    if (match && match[1]) filename = match[1];
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+  return { success: true, filename };
+}
+
 export const api = {
   // Public Portal Endpoints (Zero authentication required)
   getDepartmentInfo: async () => {
@@ -330,6 +362,46 @@ export const api = {
   getEntityRecommendations: async (entityType, entityId, params = {}) => {
     const query = new URLSearchParams(params).toString();
     const res = await request(`/insights/recommendations/${entityType}/${entityId}${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
+  // ==========================================
+  // PHASE 5: REPORTS & DOCUMENT EXPORTS
+  // ==========================================
+
+  exportDepartmentReport: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const ext = params.format === 'excel' ? 'xlsx' : (params.format || 'pdf');
+    return downloadFile(`/reports/department${query ? `?${query}` : ''}`, `department_report.${ext}`);
+  },
+
+  exportSectionReport: async (sectionId, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const ext = params.format === 'excel' ? 'xlsx' : (params.format || 'pdf');
+    return downloadFile(`/reports/section/${sectionId}${query ? `?${query}` : ''}`, `section_report.${ext}`);
+  },
+
+  exportStudentReport: async (studentId, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const ext = params.format === 'excel' ? 'xlsx' : (params.format || 'pdf');
+    return downloadFile(`/reports/student/${studentId}${query ? `?${query}` : ''}`, `student_dossier.${ext}`);
+  },
+
+  exportSubjectReport: async (subjectId, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const ext = params.format === 'excel' ? 'xlsx' : (params.format || 'pdf');
+    return downloadFile(`/reports/subject/${subjectId}${query ? `?${query}` : ''}`, `subject_report.${ext}`);
+  },
+
+  exportInsightsReport: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const ext = params.format === 'excel' ? 'xlsx' : (params.format || 'pdf');
+    return downloadFile(`/reports/insights${query ? `?${query}` : ''}`, `academic_insights.${ext}`);
+  },
+
+  previewReport: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/reports/preview${query ? `?${query}` : ''}`);
     return res.data;
   },
 };

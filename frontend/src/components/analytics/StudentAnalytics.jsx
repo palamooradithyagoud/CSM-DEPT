@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   RefreshCw,
   ExternalLink,
+  Download,
 } from 'lucide-react';
 import { api } from '../../services/api';
 
@@ -166,6 +167,20 @@ export default function StudentAnalytics({ studentId: initialStudentId, onClose 
                   <span className="font-mono text-primary font-semibold text-base">{studentData.student?.roll_number}</span>
                   <span className="meta-divider">•</span>
                   <span className="badge badge-outline">Undergraduate Department Cohort</span>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    style={{ marginLeft: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.6rem' }}
+                    onClick={async () => {
+                      try {
+                        await api.exportStudentReport(selectedStudentId, { format: 'pdf' });
+                      } catch (e) {
+                        alert('Export failed: ' + e.message);
+                      }
+                    }}
+                  >
+                    <Download size={13} />
+                    <span>Export Dossier (PDF)</span>
+                  </button>
                 </div>
               </div>
 

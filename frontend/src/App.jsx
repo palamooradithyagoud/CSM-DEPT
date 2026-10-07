@@ -82,6 +82,7 @@ export default function App() {
         hash === '#hod/dashboard' ||
         hash === '#hod/analytics' ||
         hash === '#hod/insights' ||
+        hash === '#hod/reports' ||
         hash === '#hod/upload' ||
         hash === '#hod/students' ||
         hash === '#hod/subjects' ||
@@ -107,6 +108,7 @@ export default function App() {
 
   const getInitialTab = () => {
     const hash = window.location.hash;
+    if (hash === '#hod/reports') return 'reports';
     if (hash === '#hod/insights') return 'insights';
     if (hash === '#hod/analytics') return 'analytics';
     if (hash === '#hod/upload') return 'upload';

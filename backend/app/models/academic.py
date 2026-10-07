@@ -151,7 +151,7 @@ class Student(db.Model):
     roll_number = db.Column(db.String(40), unique=True, nullable=False, index=True)  # e.g., "25881A6601"
     name = db.Column(db.String(120), nullable=False, index=True)
     batch_id = db.Column(db.String(36), db.ForeignKey("batches.id"), nullable=False, index=True)
-    current_section_id = db.Column(db.String(36), db.ForeignKey("sections.id"), nullable=True)
+    current_section_id = db.Column(db.String(36), db.ForeignKey("sections.id"), nullable=True, index=True)
     email = db.Column(db.String(120), nullable=True)
     phone = db.Column(db.String(40), nullable=True)
     gender = db.Column(db.String(10), nullable=True)
@@ -323,7 +323,7 @@ class SemesterResult(db.Model):
     grade = db.Column(db.String(10), nullable=True)  # e.g., "O", "A+", "A", "B+", "B", "C", "F", "AB"
     grade_point = db.Column(db.Float, nullable=True)  # e.g., 10.0, 9.0, 8.0, 0.0
     credits_earned = db.Column(db.Float, nullable=True)
-    result_status = db.Column(db.String(20), default="PASSED")  # PASSED, FAILED, ABSENT
+    result_status = db.Column(db.String(20), default="PASSED", index=True)  # PASSED, FAILED, ABSENT
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
@@ -399,11 +399,11 @@ class UploadHistory(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     filename = db.Column(db.String(255), nullable=False)
     uploaded_by = db.Column(db.String(120), nullable=False)
-    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
-    batch_id = db.Column(db.String(36), db.ForeignKey("batches.id"), nullable=False)
-    academic_year_id = db.Column(db.String(36), db.ForeignKey("academic_years.id"), nullable=False)
-    semester_id = db.Column(db.String(36), db.ForeignKey("semesters.id"), nullable=False)
-    section_id = db.Column(db.String(36), db.ForeignKey("sections.id"), nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    batch_id = db.Column(db.String(36), db.ForeignKey("batches.id"), nullable=False, index=True)
+    academic_year_id = db.Column(db.String(36), db.ForeignKey("academic_years.id"), nullable=False, index=True)
+    semester_id = db.Column(db.String(36), db.ForeignKey("semesters.id"), nullable=False, index=True)
+    section_id = db.Column(db.String(36), db.ForeignKey("sections.id"), nullable=False, index=True)
     data_type = db.Column(db.String(30), nullable=False)  # ATTENDANCE, MID_1, MID_2, SEMESTER_RESULT
     total_rows = db.Column(db.Integer, default=0)
     valid_rows = db.Column(db.Integer, default=0)

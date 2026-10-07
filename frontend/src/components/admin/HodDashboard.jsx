@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   BarChart3,
   AlertTriangle,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -23,6 +24,7 @@ import SubjectManager from './SubjectManager';
 import UploadHistoryView from './UploadHistoryView';
 import AcademicAnalytics from '../analytics/AcademicAnalytics';
 import AcademicInsights from '../insights/AcademicInsights';
+import ReportsHub from '../reports/ReportsHub';
 
 export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }) {
   const { user, logout } = useAuth();
@@ -52,7 +54,7 @@ export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }
             </button>
             <div className="divider-vert" />
             <div className="hod-title-wrap">
-              <span className="badge badge-success">Phase 2 Production</span>
+              <span className="badge badge-success">Phase 5 Production Suite</span>
               <h1 className="hod-main-title">HOD Academic Data Management Suite</h1>
             </div>
           </div>
@@ -107,6 +109,18 @@ export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }
           >
             <AlertTriangle size={16} />
             <span>Academic Insights</span>
+          </button>
+
+          <button
+            id="hod-nav-reports"
+            className={`nav-tab-btn ${activeTab === 'reports' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('reports');
+              window.location.hash = '#hod/reports';
+            }}
+          >
+            <FileText size={16} />
+            <span>Reports & Exports</span>
           </button>
 
           <button
@@ -213,6 +227,10 @@ export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }
 
         {activeTab === 'insights' && (
           <AcademicInsights batches={batches} />
+        )}
+
+        {activeTab === 'reports' && (
+          <ReportsHub />
         )}
 
         {activeTab === 'upload' && (

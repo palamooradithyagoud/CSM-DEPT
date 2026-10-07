@@ -9,7 +9,9 @@ import {
   BookOpen,
   TrendingDown,
   Sparkles,
+  Download,
 } from 'lucide-react';
+import { api } from '../../services/api';
 
 export default function StudentDiagnosticDrawer({ studentInsight, onClose }) {
   if (!studentInsight) return null;
@@ -149,6 +151,24 @@ export default function StudentDiagnosticDrawer({ studentInsight, onClose }) {
             ) : (
               <p className="text-xs text-muted">No specific interventions required at this time.</p>
             )}
+          </div>
+
+          {/* Export Action */}
+          <div style={{ marginTop: '1.25rem' }}>
+            <button
+              className="btn btn-primary"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', padding: '0.75rem', background: '#32DC5C', color: '#050506', fontWeight: 600, borderRadius: '8px', border: 'none', cursor: 'pointer' }}
+              onClick={async () => {
+                try {
+                  await api.exportStudentReport(studentInsight.student_id || studentInsight.id, { format: 'pdf' });
+                } catch (e) {
+                  alert('Export failed: ' + e.message);
+                }
+              }}
+            >
+              <Download size={16} />
+              <span>Download Official Student Dossier (PDF)</span>
+            </button>
           </div>
         </div>
       </div>

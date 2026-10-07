@@ -349,44 +349,23 @@ with app.app_context():
         db.session.flush()
         print("Created 8 Semesters.")
 
-        # Create Sections for Semesters 1, 2, 3
+        # Create Sections for all Semesters 1 through 8
         section_map = {}
         for s in semesters:
-            if s.semester_number in [1, 2, 3]:
-                for sec_letter in ["A", "B", "C"]:
-                    sec = Section(
-                        semester_id=s.id,
-                        name=sec_letter,
-                        room_number=f"Room-{sec_letter}-30{s.semester_number}",
-                    )
-                    db.session.add(sec)
-                    section_map[(s.semester_number, sec_letter)] = sec
+            for sec_letter in ["A", "B", "C"]:
+                sec = Section(
+                    semester_id=s.id,
+                    name=sec_letter,
+                    room_number=f"Room-{sec_letter}-30{s.semester_number}",
+                )
+                db.session.add(sec)
+                section_map[(s.semester_number, sec_letter)] = sec
         db.session.flush()
-        print("Created Configurable Sections (A, B, C) for Semesters 1, 2, 3.")
+        print("Created Configurable Sections (A, B, C) for all Semesters 1 through 8.")
 
-        # Seed Subjects for Semester 3
-        sem3 = next((s for s in semesters if s.semester_number == 3), None)
-        if sem3:
-            sem3_subjects = [
-                {"code": "A9002", "name": "Ordinary Differential Equations and Calculus of Variations", "short_name": "ODECV", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9009", "name": "Engineering Chemistry", "short_name": "EC", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9011", "name": "Engineering Science Elective", "short_name": "ESE", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9503", "name": "Data Structures using C++", "short_name": "DS", "credits": 4.0, "subject_type": "THEORY"},
-                {"code": "A9402", "name": "Digital Electronics", "short_name": "DE", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9010", "name": "Engineering Chemistry Lab", "short_name": "ECL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9012", "name": "Engineering Science Elective Lab", "short_name": "ESEL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9504", "name": "Data Structures Lab", "short_name": "DSL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9304", "name": "Computer Aided Engineering Graphics", "short_name": "CAEG", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9022", "name": "Professional Development & Design", "short_name": "PDD", "credits": 2.0, "subject_type": "THEORY"},
-            ]
-            for sub in sem3_subjects:
-                db.session.add(Subject(semester_id=sem3.id, **sub))
-            print(f"Created {len(sem3_subjects)} Subjects for Semester 3.")
-
-        # Seed Subjects for Semester 1 (for 1-1 results)
-        sem1 = next((s for s in semesters if s.semester_number == 1), None)
-        if sem1:
-            sem1_subjects = [
+        # Seed Distinct Curriculum Subjects for each semester (2 semesters per year)
+        curriculum_by_sem = {
+            1: [
                 {"code": "A9001", "name": "Matrices and Calculus", "short_name": "MAC", "credits": 3.0, "subject_type": "THEORY"},
                 {"code": "A9501", "name": "Programming for Problem Solving", "short_name": "PPS", "credits": 3.0, "subject_type": "THEORY"},
                 {"code": "A9502", "name": "Programming for Problem Solving Lab", "short_name": "PPSL", "credits": 1.5, "subject_type": "LAB"},
@@ -397,10 +376,87 @@ with app.app_context():
                 {"code": "A9204", "name": "Basic Electrical Engineering", "short_name": "BEE", "credits": 3.0, "subject_type": "THEORY"},
                 {"code": "A9801", "name": "Foundations of Data Science", "short_name": "FDS", "credits": 3.0, "subject_type": "THEORY"},
                 {"code": "A9205", "name": "Basic Electrical Engineering Lab", "short_name": "BEEL", "credits": 1.5, "subject_type": "LAB"},
-            ]
-            for sub in sem1_subjects:
-                db.session.add(Subject(semester_id=sem1.id, **sub))
-            print(f"Created {len(sem1_subjects)} Subjects for Semester 1.")
+            ],
+            2: [
+                {"code": "A9003", "name": "Linear Algebra and Advanced Calculus", "short_name": "LAAC", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9004", "name": "Applied Chemistry", "short_name": "AC", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9005", "name": "Applied Chemistry Lab", "short_name": "ACL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9505", "name": "Python Programming for Problem Solving", "short_name": "PPPS", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9506", "name": "Python Programming Lab", "short_name": "PYLAB", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9013", "name": "English for Skill Enhancement", "short_name": "ESE", "credits": 2.0, "subject_type": "THEORY"},
+                {"code": "A9014", "name": "English Language & Communication Skills Lab", "short_name": "ELCS", "credits": 1.0, "subject_type": "LAB"},
+                {"code": "A9206", "name": "Electronic Devices and Circuits", "short_name": "EDC", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9207", "name": "Electronic Devices and Circuits Lab", "short_name": "EDCL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9023", "name": "Environmental Science and Ecology", "short_name": "EVS", "credits": 2.0, "subject_type": "THEORY"},
+            ],
+            3: [
+                {"code": "A9002", "name": "Ordinary Differential Equations and Calculus of Variations", "short_name": "ODECV", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9009", "name": "Engineering Chemistry", "short_name": "EC", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9011", "name": "Engineering Science Elective", "short_name": "ESE", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9503", "name": "Data Structures using C++", "short_name": "DS", "credits": 4.0, "subject_type": "THEORY"},
+                {"code": "A9402", "name": "Digital Electronics", "short_name": "DE", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9010", "name": "Engineering Chemistry Lab", "short_name": "ECL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9012", "name": "Engineering Science Elective Lab", "short_name": "ESEL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9504", "name": "Data Structures Lab", "short_name": "DSL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9304", "name": "Computer Aided Engineering Graphics", "short_name": "CAEG", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9022", "name": "Professional Development & Design", "short_name": "PDD", "credits": 2.0, "subject_type": "THEORY"},
+            ],
+            4: [
+                {"code": "A9006", "name": "Discrete Mathematics and Graph Theory", "short_name": "DMGT", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9507", "name": "Database Management Systems", "short_name": "DBMS", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9508", "name": "Database Management Systems Lab", "short_name": "DBMSL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9509", "name": "Operating Systems", "short_name": "OS", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9510", "name": "Operating Systems Lab", "short_name": "OSL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9511", "name": "Computer Organization and Architecture", "short_name": "COA", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9512", "name": "Object-Oriented Programming through Java", "short_name": "JAVA", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9513", "name": "Java Programming Lab", "short_name": "JAVAL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9514", "name": "Design and Analysis of Algorithms", "short_name": "DAA", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9024", "name": "Constitution of India", "short_name": "COI", "credits": 2.0, "subject_type": "THEORY"},
+            ],
+            5: [
+                {"code": "A9515", "name": "Computer Networks", "short_name": "CN", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9516", "name": "Formal Languages and Automata Theory", "short_name": "FLAT", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9802", "name": "Machine Learning", "short_name": "ML", "credits": 4.0, "subject_type": "THEORY"},
+                {"code": "A9803", "name": "Machine Learning Lab", "short_name": "MLL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9517", "name": "Software Engineering", "short_name": "SE", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9518", "name": "Web Technologies", "short_name": "WT", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9519", "name": "Web Technologies Lab", "short_name": "WTL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9520", "name": "Computer Networks Lab", "short_name": "CNL", "credits": 1.5, "subject_type": "LAB"},
+            ],
+            6: [
+                {"code": "A9804", "name": "Artificial Intelligence", "short_name": "AI", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9805", "name": "Artificial Intelligence Lab", "short_name": "AIL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9521", "name": "Compiler Design", "short_name": "CD", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9806", "name": "Deep Learning and Neural Networks", "short_name": "DL", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9807", "name": "Deep Learning Lab", "short_name": "DLL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9522", "name": "Cloud Computing and Distributed Systems", "short_name": "CC", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9025", "name": "Intellectual Property Rights and Cyber Law", "short_name": "IPR", "credits": 2.0, "subject_type": "THEORY"},
+                {"code": "A9523", "name": "Industry Oriented Mini Project", "short_name": "MP", "credits": 2.0, "subject_type": "LAB"},
+            ],
+            7: [
+                {"code": "A9524", "name": "Cryptography and Network Security", "short_name": "CNS", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9808", "name": "Natural Language Processing", "short_name": "NLP", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9809", "name": "Big Data Analytics and Processing", "short_name": "BDA", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9525", "name": "Network Security Lab", "short_name": "NSL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9810", "name": "Big Data Analytics Lab", "short_name": "BDAL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9526", "name": "Professional Elective - DevOps and Agile Engineering", "short_name": "DEVOPS", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9527", "name": "Major Project Stage - I", "short_name": "PROJ1", "credits": 3.0, "subject_type": "LAB"},
+            ],
+            8: [
+                {"code": "A9811", "name": "Deep Reinforcement Learning", "short_name": "DRL", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9812", "name": "Autonomous Intelligent Systems & Robotics", "short_name": "AIS", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9026", "name": "Management Fundamentals & Entrepreneurship", "short_name": "MFE", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9528", "name": "Major Project Stage - II / Capstone Internship", "short_name": "PROJ2", "credits": 10.0, "subject_type": "LAB"},
+            ],
+        }
+
+        total_subjects = 0
+        for sem in semesters:
+            sub_list = curriculum_by_sem.get(sem.semester_number, [])
+            for sub_data in sub_list:
+                db.session.add(Subject(semester_id=sem.id, **sub_data))
+                total_subjects += 1
+        print(f"Seeded {total_subjects} distinct curriculum subjects across all 8 semesters (2 semesters per year).")
 
         # Seed Students from Department Roster
         import openpyxl

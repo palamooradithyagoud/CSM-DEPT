@@ -7,6 +7,7 @@ import {
   Activity,
   Award,
   User,
+  Download,
 } from 'lucide-react';
 import { api } from '../../services/api';
 import AnalyticsFilters from './AnalyticsFilters';
@@ -148,6 +149,47 @@ export default function AcademicAnalytics({ batches }) {
           <Award size={15} />
           <span>Grade Distribution</span>
         </button>
+
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
+          <button
+            id="analytics-export-pdf"
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.65rem' }}
+            onClick={async () => {
+              try {
+                await api.exportDepartmentReport({
+                  batch_id: filters.batchId,
+                  semester_id: filters.semesterId,
+                  format: 'pdf',
+                });
+              } catch (e) {
+                alert('Export failed: ' + e.message);
+              }
+            }}
+          >
+            <Download size={13} />
+            <span>Export PDF</span>
+          </button>
+          <button
+            id="analytics-export-excel"
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.65rem' }}
+            onClick={async () => {
+              try {
+                await api.exportDepartmentReport({
+                  batch_id: filters.batchId,
+                  semester_id: filters.semesterId,
+                  format: 'excel',
+                });
+              } catch (e) {
+                alert('Export failed: ' + e.message);
+              }
+            }}
+          >
+            <Download size={13} />
+            <span>Export Excel</span>
+          </button>
+        </div>
       </div>
 
       {/* Sub-view Rendering */}

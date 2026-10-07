@@ -9,6 +9,7 @@ import {
   Sliders,
   ShieldAlert,
   ArrowRight,
+  Download,
 } from 'lucide-react';
 import { api } from '../../services/api';
 import InsightsFilters from './InsightsFilters';
@@ -201,6 +202,49 @@ export default function AcademicInsights({ batches }) {
           <Layers size={15} />
           <span>Section Diagnostics ({summary.sectionsRequiringAttention})</span>
         </button>
+
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
+          <button
+            id="insights-export-pdf"
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.65rem' }}
+            onClick={async () => {
+              try {
+                await api.exportInsightsReport({
+                  batch_id: filters.batchId,
+                  semester_id: filters.semesterId,
+                  section_id: filters.sectionId,
+                  format: 'pdf',
+                });
+              } catch (e) {
+                alert('Export failed: ' + e.message);
+              }
+            }}
+          >
+            <Download size={13} />
+            <span>Export PDF</span>
+          </button>
+          <button
+            id="insights-export-excel"
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.65rem' }}
+            onClick={async () => {
+              try {
+                await api.exportInsightsReport({
+                  batch_id: filters.batchId,
+                  semester_id: filters.semesterId,
+                  section_id: filters.sectionId,
+                  format: 'excel',
+                });
+              } catch (e) {
+                alert('Export failed: ' + e.message);
+              }
+            }}
+          >
+            <Download size={13} />
+            <span>Export Excel</span>
+          </button>
+        </div>
       </div>
 
       {/* 4. Tab Views */}

@@ -21,6 +21,9 @@ __pycache__/
 *.sqlite
 *.sqlite3
 backend/student_management.db
+backend/backups/
+backups/
+*.dump
 *.log
 
 # Node & Frontend Build Artifacts
