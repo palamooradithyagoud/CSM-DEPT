@@ -14,8 +14,9 @@ import GallerySection from './components/public/GallerySection';
 import AnnouncementsSection from './components/public/AnnouncementsSection';
 import ContactSection from './components/public/ContactSection';
 import LoginModal from './components/auth/LoginModal';
-import AdminLanding from './components/admin/AdminLanding';
+import HodDashboard from './components/admin/HodDashboard';
 import { Loader2 } from 'lucide-react';
+
 
 export default function App() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -99,7 +100,7 @@ export default function App() {
   // If viewing admin workspace and authenticated
   if (currentView === 'admin' && isAuthenticated) {
     return (
-      <AdminLanding
+      <HodDashboard
         onBackToPublic={() => {
           setCurrentView('public');
           window.location.hash = '#overview';
@@ -107,6 +108,7 @@ export default function App() {
       />
     );
   }
+
 
   return (
     <div className="app-root">

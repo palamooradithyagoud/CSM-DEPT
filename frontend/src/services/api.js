@@ -1,12 +1,14 @@
 const API_BASE = '/api/v1';
 
 /**
- * Fetch wrapper with token authorization and JSON handling
+ * Fetch wrapper with token authorization and JSON / FormData handling
  */
 async function request(endpoint, options = {}) {
   const token = localStorage.getItem('dept_access_token');
+  const isFormData = options.body instanceof FormData;
+
   const headers = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
@@ -25,7 +27,7 @@ async function request(endpoint, options = {}) {
     const errorMsg = data.message || `Request failed with status ${response.status}`;
     const error = new Error(errorMsg);
     error.status = response.status;
-    error.details = data.error?.details;
+    error.details = data.error?.details || data.errors;
     throw error;
   }
 
@@ -102,4 +104,131 @@ export const api = {
     const res = await request('/auth/me');
     return res.data?.user;
   },
+
+  // ==========================================
+  // PHASE 2: ACADEMIC DATA MANAGEMENT ENDPOINTS
+  // ==========================================
+
+  // Hierarchy
+  getBatches: async () => {
+    const res = await request('/batches');
+    return res.data || [];
+  },
+
+  createBatch: async (data) => {
+    const res = await request('/batches', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res;
+  },
+
+  getAcademicYears: async (batchId) => {
+    const query = batchId ? `?batch_id=${batchId}` : '';
+    const res = await request(`/academic-years${query}`);
+    return res.data || [];
+  },
+
+  getSemesters: async (academicYearId) => {
+    const query = academicYearId ? `?academic_year_id=${academicYearId}` : '';
+    const res = await request(`/semesters${query}`);
+    return res.data || [];
+  },
+
+  getSections: async (semesterId) => {
+    const query = semesterId ? `?semester_id=${semesterId}` : '';
+    const res = await request(`/sections${query}`);
+    return res.data || [];
+  },
+
+  createSection: async (data) => {
+    const res = await request('/sections', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res;
+  },
+
+  // Subjects
+  getSubjects: async (semesterId) => {
+    const query = semesterId ? `?semester_id=${semesterId}` : '';
+    const res = await request(`/subjects${query}`);
+    return res.data || [];
+  },
+
+  createSubject: async (data) => {
+    const res = await request('/subjects', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res;
+  },
+
+  // Students
+  getStudents: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/students${query ? `?${query}` : ''}`);
+    return res;
+  },
+
+  getStudentDetail: async (id) => {
+    const res = await request(`/students/${id}`);
+    return res.data;
+  },
+
+  createStudent: async (data) => {
+    const res = await request('/students', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res;
+  },
+
+  // Academic Uploads
+  validateUpload: async (formData) => {
+    const res = await request('/uploads/validate', {
+      method: 'POST',
+      body: formData,
+    });
+    return res;
+  },
+
+  confirmUpload: async (payload) => {
+    const res = await request('/uploads/confirm', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    return res;
+  },
+
+  getUploadHistory: async (page = 1, limit = 20) => {
+    const res = await request(`/uploads/history?page=${page}&limit=${limit}`);
+    return res;
+  },
+
+  // Academic Data Availability Matrix
+  getDataAvailability: async (semesterId, sectionId) => {
+    const res = await request(`/academic-data/availability?semester_id=${semesterId}&section_id=${sectionId}`);
+    return res.data;
+  },
+
+  // Academic Data Records
+  getAttendanceRecords: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/attendance${query ? `?${query}` : ''}`);
+    return res.data || [];
+  },
+
+  getAssessmentRecords: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/assessments${query ? `?${query}` : ''}`);
+    return res.data || [];
+  },
+
+  getSemesterResults: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/results${query ? `?${query}` : ''}`);
+    return res.data || [];
+  },
 };
+

@@ -282,13 +282,177 @@ with app.app_context():
                 "title": "Commencement of Doubt-Clearing & Remedial Modules",
                 "content": "Special remedial classes for Mathematics-III, Data Structures, and Computer Organization will begin this Saturday. Check the department notice board for section timings.",
                 "category": "Notice",
-                "is_pinned": False,
-                "publish_date": date(2026, 9, 26),
             },
         ]
         for ann in announcements_data:
             db.session.add(Announcement(**ann))
         print("Seeded Announcements.")
 
+    # 7. Seed Phase 2 Academic Hierarchy (Batch 2025-2029)
+    from app.models.academic import (
+        Batch,
+        AcademicYear,
+        Semester,
+        Section,
+        Student,
+        Subject,
+    )
+
+    batch_name = "2025-2029"
+    batch = Batch.query.filter_by(name=batch_name).first()
+    if not batch:
+        batch = Batch(
+            name=batch_name,
+            start_year=2025,
+            end_year=2029,
+            is_active=True,
+        )
+        db.session.add(batch)
+        db.session.flush()
+        print(f"Created Batch: {batch_name}")
+
+        year_names = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
+        academic_years = []
+        for idx, y_name in enumerate(year_names, start=1):
+            cal_start = 2025 + (idx - 1)
+            ay = AcademicYear(
+                batch_id=batch.id,
+                year_number=idx,
+                name=y_name,
+                calendar_year=f"{cal_start}-{cal_start + 1}",
+                is_current=(idx == 2),  # 2nd Year is current focus
+            )
+            db.session.add(ay)
+            academic_years.append(ay)
+        db.session.flush()
+        print("Created 4 Academic Years.")
+
+        semesters = []
+        for ay in academic_years:
+            s1_num = (ay.year_number * 2) - 1
+            s2_num = ay.year_number * 2
+
+            s1 = Semester(
+                academic_year_id=ay.id,
+                semester_number=s1_num,
+                name=f"Semester {s1_num}",
+                is_current=(s1_num == 3),  # Semester 3 is current focus
+            )
+            s2 = Semester(
+                academic_year_id=ay.id,
+                semester_number=s2_num,
+                name=f"Semester {s2_num}",
+                is_current=False,
+            )
+            db.session.add_all([s1, s2])
+            semesters.extend([s1, s2])
+        db.session.flush()
+        print("Created 8 Semesters.")
+
+        # Create Sections for Semesters 1, 2, 3
+        section_map = {}
+        for s in semesters:
+            if s.semester_number in [1, 2, 3]:
+                for sec_letter in ["A", "B", "C"]:
+                    sec = Section(
+                        semester_id=s.id,
+                        name=sec_letter,
+                        room_number=f"Room-{sec_letter}-30{s.semester_number}",
+                    )
+                    db.session.add(sec)
+                    section_map[(s.semester_number, sec_letter)] = sec
+        db.session.flush()
+        print("Created Configurable Sections (A, B, C) for Semesters 1, 2, 3.")
+
+        # Seed Subjects for Semester 3
+        sem3 = next((s for s in semesters if s.semester_number == 3), None)
+        if sem3:
+            sem3_subjects = [
+                {"code": "A9002", "name": "Ordinary Differential Equations and Calculus of Variations", "short_name": "ODECV", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9009", "name": "Engineering Chemistry", "short_name": "EC", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9011", "name": "Engineering Science Elective", "short_name": "ESE", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9503", "name": "Data Structures using C++", "short_name": "DS", "credits": 4.0, "subject_type": "THEORY"},
+                {"code": "A9402", "name": "Digital Electronics", "short_name": "DE", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9010", "name": "Engineering Chemistry Lab", "short_name": "ECL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9012", "name": "Engineering Science Elective Lab", "short_name": "ESEL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9504", "name": "Data Structures Lab", "short_name": "DSL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9304", "name": "Computer Aided Engineering Graphics", "short_name": "CAEG", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9022", "name": "Professional Development & Design", "short_name": "PDD", "credits": 2.0, "subject_type": "THEORY"},
+            ]
+            for sub in sem3_subjects:
+                db.session.add(Subject(semester_id=sem3.id, **sub))
+            print(f"Created {len(sem3_subjects)} Subjects for Semester 3.")
+
+        # Seed Subjects for Semester 1 (for 1-1 results)
+        sem1 = next((s for s in semesters if s.semester_number == 1), None)
+        if sem1:
+            sem1_subjects = [
+                {"code": "A9001", "name": "Matrices and Calculus", "short_name": "MAC", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9501", "name": "Programming for Problem Solving", "short_name": "PPS", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9502", "name": "Programming for Problem Solving Lab", "short_name": "PPSL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9302", "name": "Engineering Workshop", "short_name": "EW", "credits": 2.5, "subject_type": "LAB"},
+                {"code": "A9021", "name": "Critical Thinking & Design Thinking", "short_name": "CCDT", "credits": 2.0, "subject_type": "THEORY"},
+                {"code": "A9007", "name": "Engineering Physics", "short_name": "EP", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9008", "name": "Engineering Physics Lab", "short_name": "EPL", "credits": 1.5, "subject_type": "LAB"},
+                {"code": "A9204", "name": "Basic Electrical Engineering", "short_name": "BEE", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9801", "name": "Foundations of Data Science", "short_name": "FDS", "credits": 3.0, "subject_type": "THEORY"},
+                {"code": "A9205", "name": "Basic Electrical Engineering Lab", "short_name": "BEEL", "credits": 1.5, "subject_type": "LAB"},
+            ]
+            for sub in sem1_subjects:
+                db.session.add(Subject(semester_id=sem1.id, **sub))
+            print(f"Created {len(sem1_subjects)} Subjects for Semester 1.")
+
+        # Seed Students from Department Roster
+        import openpyxl
+        roster_files = [
+            ("A", os.path.join("..", "Students data", "ATTENDENCE", "7. CSM-I B.Tech. II _A.xlsx")),
+            ("B", os.path.join("..", "Students data", "ATTENDENCE", "7. CSM-I B.Tech. II _B.xlsx")),
+            ("C", os.path.join("..", "Students data", "ATTENDENCE", "7. CSM-I B.Tech. II _C.xlsx")),
+        ]
+
+        total_students_seeded = 0
+        for sec_letter, rel_path in roster_files:
+            target_sec = section_map.get((3, sec_letter))
+            if os.path.exists(rel_path):
+                try:
+                    wb = openpyxl.load_workbook(rel_path, data_only=True)
+                    ws = wb.active
+                    for r in range(7, ws.max_row + 1):
+                        roll_val = ws.cell(r, 3).value
+                        if roll_val and str(roll_val).strip() and not any(w in str(roll_val).lower() for w in ["total", "avg", "percent"]):
+                            roll = str(roll_val).strip().upper()
+                            name_val = ws.cell(r, 4).value
+                            name = str(name_val).strip() if name_val else f"Student {roll}"
+                            
+                            st = Student(
+                                roll_number=roll,
+                                name=name,
+                                batch_id=batch.id,
+                                current_section_id=target_sec.id if target_sec else None,
+                                email=f"{roll.lower()}@department.edu",
+                                is_active=True,
+                            )
+                            db.session.add(st)
+                            total_students_seeded += 1
+                except Exception as e:
+                    print(f"Notice: Could not parse {rel_path}: {e}")
+
+        # Fallback if roster files were not located
+        if total_students_seeded == 0:
+            for i in range(1, 66):
+                roll = f"25881A66{i:02d}"
+                st = Student(
+                    roll_number=roll,
+                    name=f"Student {roll}",
+                    batch_id=batch.id,
+                    current_section_id=section_map.get((3, "A")).id if section_map.get((3, "A")) else None,
+                    is_active=True,
+                )
+                db.session.add(st)
+                total_students_seeded += 1
+
+        print(f"Seeded {total_students_seeded} Students for Batch 2025-2029 across Sections A, B, C.")
+
     db.session.commit()
     print("Database seeding completed successfully!")
+

@@ -6,6 +6,19 @@ from app.models.department import (
     StudentAchievement,
     Announcement,
 )
+from app.models.academic import (
+    Batch,
+    AcademicYear,
+    Semester,
+    Section,
+    Student,
+    Subject,
+    AttendanceRecord,
+    AssessmentRecord,
+    SemesterResult,
+    StudentSemesterSummary,
+    UploadHistory,
+)
 
 __all__ = [
     "User",
@@ -14,4 +27,16 @@ __all__ = [
     "DepartmentEvent",
     "StudentAchievement",
     "Announcement",
+    "Batch",
+    "AcademicYear",
+    "Semester",
+    "Section",
+    "Student",
+    "Subject",
+    "AttendanceRecord",
+    "AssessmentRecord",
+    "SemesterResult",
+    "StudentSemesterSummary",
+    "UploadHistory",
 ]
+

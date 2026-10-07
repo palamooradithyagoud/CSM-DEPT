@@ -4,6 +4,8 @@ from app.config import config_by_name
 from app.extensions import db, jwt, cors, migrate
 from app.api.auth_bp import auth_bp
 from app.api.public_bp import public_bp
+from app.api.academic_bp import academic_bp
+from app.api.uploads_bp import uploads_bp
 from app.utils.response import api_error, api_response
 
 
@@ -43,6 +45,9 @@ def create_app(config_name=None):
     # Register blueprints
     app.register_blueprint(public_bp, url_prefix="/api/v1/public")
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
+    app.register_blueprint(academic_bp)
+    app.register_blueprint(uploads_bp)
+
 
     # System Health Check
     @app.route("/api/v1/health", methods=["GET"])
