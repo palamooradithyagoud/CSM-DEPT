@@ -403,7 +403,7 @@ class UploadHistory(db.Model):
     batch_id = db.Column(db.String(36), db.ForeignKey("batches.id"), nullable=False, index=True)
     academic_year_id = db.Column(db.String(36), db.ForeignKey("academic_years.id"), nullable=False, index=True)
     semester_id = db.Column(db.String(36), db.ForeignKey("semesters.id"), nullable=False, index=True)
-    section_id = db.Column(db.String(36), db.ForeignKey("sections.id"), nullable=False, index=True)
+    section_id = db.Column(db.String(36), db.ForeignKey("sections.id"), nullable=True, index=True)
     data_type = db.Column(db.String(30), nullable=False)  # ATTENDANCE, MID_1, MID_2, SEMESTER_RESULT
     total_rows = db.Column(db.Integer, default=0)
     valid_rows = db.Column(db.Integer, default=0)
@@ -430,8 +430,8 @@ class UploadHistory(db.Model):
             "academicYearName": self.academic_year.name if self.academic_year else None,
             "semesterId": self.semester_id,
             "semesterName": self.semester.name if self.semester else None,
-            "sectionId": self.section_id,
-            "sectionName": self.section.name if self.section else None,
+            "sectionId": self.section_id or "OVERALL",
+            "sectionName": self.section.name if self.section else "Overall (All Sections)",
             "dataType": self.data_type,
             "totalRows": self.total_rows,
             "validRows": self.valid_rows,

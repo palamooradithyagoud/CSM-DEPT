@@ -128,7 +128,7 @@ export default function AnalyticsFilters({ batches, filters, onChange, onRefresh
             onChange={(e) => onChange({ sectionId: e.target.value })}
             className="form-select form-select-sm"
           >
-            <option value="">All Sections</option>
+            <option value="">Overall Year (All Sections — A, B, C)</option>
             {sections.map((sec) => (
               <option key={sec.id} value={sec.id}>
                 Section {sec.name}

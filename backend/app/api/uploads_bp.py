@@ -24,6 +24,17 @@ def validate_upload():
     section_id = request.form.get("sectionId") or request.form.get("section_id")
     data_type = (request.form.get("dataType") or request.form.get("data_type") or "").strip().upper()
 
+    # Rule: Attendance must be section-wise (A, B, C); Results default to overall year (all sections A, B, C)
+    if data_type == "ATTENDANCE":
+        if not section_id or str(section_id).strip().upper() in ["OVERALL", "ALL", "NONE", ""]:
+            return jsonify({
+                "success": False,
+                "message": "Attendance must be Section-Wise. Please select Section A, B, or C.",
+            }), 400
+    else:
+        if not section_id or str(section_id).strip().upper() in ["OVERALL", "ALL", "NONE", ""]:
+            section_id = "OVERALL"
+
     if not all([batch_id, academic_year_id, semester_id, section_id, data_type]):
         return jsonify({
             "success": False,

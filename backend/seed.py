@@ -424,47 +424,39 @@ with app.app_context():
         sem1 = semesters[0]  # Semester 1
         sem2 = semesters[1]  # Semester 2
 
-        # Ingest Semester 1 Results (Dynamically extracts 10 subjects from RESULT 1-1.xlsx)
+        # Ingest Semester 1 Results (Overall year across all sections A, B, C)
         res_1_path = os.path.join("..", "Students data", "sem result", "RESULT 1-1.xlsx")
         if os.path.exists(res_1_path):
             with open(res_1_path, "rb") as f:
                 rows, _ = IngestionService.parse_file_to_rows(f, "RESULT 1-1.xlsx")
                 records = IngestionService.normalize_tabular_data(rows, "SEMESTER_RESULT")
-                for sec_let in ["A", "B", "C"]:
-                    sec_obj = section_map.get((1, sec_let))
-                    sec_recs = [r for r in records if r.get("section_name") == sec_let]
-                    if sec_recs and sec_obj:
-                        val = IngestionService.validate_dataset(
-                            sec_recs, batch.id, ay1.id, sem1.id, sec_obj.id, "SEMESTER_RESULT"
-                        )
-                        if val["valid_records"]:
-                            IngestionService.execute_transactional_import(
-                                val["valid_records"], batch.id, ay1.id, sem1.id, sec_obj.id,
-                                "SEMESTER_RESULT", "REPLACE", "seed@college.edu", "RESULT 1-1.xlsx"
-                            )
+                val = IngestionService.validate_dataset(
+                    records, batch.id, ay1.id, sem1.id, "OVERALL", "SEMESTER_RESULT"
+                )
+                if val["valid_records"]:
+                    IngestionService.execute_transactional_import(
+                        val["valid_records"], batch.id, ay1.id, sem1.id, "OVERALL",
+                        "SEMESTER_RESULT", "REPLACE", "seed@college.edu", "RESULT 1-1.xlsx"
+                    )
             sem1_count = Subject.query.filter_by(semester_id=sem1.id).count()
-            print(f"Extracted {sem1_count} Subjects for Semester 1 directly from RESULT 1-1.xlsx.")
+            print(f"Extracted {sem1_count} Subjects for Semester 1 (Overall Year A, B, C) directly from RESULT 1-1.xlsx.")
 
-        # Ingest Semester 2 Results (Dynamically extracts 10 subjects from Results 1-2.xls)
+        # Ingest Semester 2 Results (Overall year across all sections A, B, C)
         res_2_path = os.path.join("..", "Students data", "sem result", "Results 1-2.xls")
         if os.path.exists(res_2_path):
             with open(res_2_path, "rb") as f:
                 rows, _ = IngestionService.parse_file_to_rows(f, "Results 1-2.xls")
                 records = IngestionService.normalize_tabular_data(rows, "SEMESTER_RESULT")
-                for sec_let in ["A", "B", "C"]:
-                    sec_obj = section_map.get((2, sec_let))
-                    sec_recs = [r for r in records if r.get("section_name") == sec_let]
-                    if sec_recs and sec_obj:
-                        val = IngestionService.validate_dataset(
-                            sec_recs, batch.id, ay1.id, sem2.id, sec_obj.id, "SEMESTER_RESULT"
-                        )
-                        if val["valid_records"]:
-                            IngestionService.execute_transactional_import(
-                                val["valid_records"], batch.id, ay1.id, sem2.id, sec_obj.id,
-                                "SEMESTER_RESULT", "REPLACE", "seed@college.edu", "Results 1-2.xls"
-                            )
+                val = IngestionService.validate_dataset(
+                    records, batch.id, ay1.id, sem2.id, "OVERALL", "SEMESTER_RESULT"
+                )
+                if val["valid_records"]:
+                    IngestionService.execute_transactional_import(
+                        val["valid_records"], batch.id, ay1.id, sem2.id, "OVERALL",
+                        "SEMESTER_RESULT", "REPLACE", "seed@college.edu", "Results 1-2.xls"
+                    )
             sem2_count = Subject.query.filter_by(semester_id=sem2.id).count()
-            print(f"Extracted {sem2_count} Subjects for Semester 2 directly from Results 1-2.xls.")
+            print(f"Extracted {sem2_count} Subjects for Semester 2 (Overall Year A, B, C) directly from Results 1-2.xls.")
 
         # Ingest Semester 1 Attendance
         att_sem1_files = [

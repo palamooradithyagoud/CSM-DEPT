@@ -691,9 +691,21 @@ class IngestionService:
         if not semester:
             raise ValueError("Semester not found or does not belong to the selected Academic Year.")
 
-        section = Section.query.filter_by(id=section_id, semester_id=semester_id).first()
-        if not section:
-            raise ValueError("Section not found or does not belong to the selected Semester.")
+        is_overall = (not section_id or str(section_id).strip().upper() in ["OVERALL", "ALL", "NONE", ""])
+
+        if is_overall and data_type == "ATTENDANCE":
+            raise ValueError("Attendance must be Section-Wise. Please select Section A, B, or C.")
+
+        section = None
+        if not is_overall:
+            section = Section.query.filter_by(id=section_id, semester_id=semester_id).first()
+            if not section:
+                raise ValueError("Section not found or does not belong to the selected Semester.")
+
+        # Cache all sections in this Semester
+        semester_sections = Section.query.filter_by(semester_id=semester_id).all()
+        sec_by_name = {s.name.upper(): s for s in semester_sections}
+        sec_by_id = {s.id: s for s in semester_sections}
 
         # Cache Students in this Batch
         all_students = Student.query.filter_by(batch_id=batch_id).all()
@@ -711,17 +723,25 @@ class IngestionService:
         # Cache Existing Database Records for Duplicate Check
         existing_keys = set()
         if data_type == "ATTENDANCE":
-            records_db = AttendanceRecord.query.filter_by(semester_id=semester_id, section_id=section_id).all()
+            records_db = AttendanceRecord.query.filter_by(semester_id=semester_id, section_id=section.id).all()
             for r in records_db:
                 existing_keys.add((r.student_id, r.subject_id))
         elif data_type in ["MID_1", "MID_2"]:
-            records_db = AssessmentRecord.query.filter_by(
-                semester_id=semester_id, section_id=section_id, assessment_type=data_type
-            ).all()
+            if is_overall:
+                records_db = AssessmentRecord.query.filter_by(
+                    semester_id=semester_id, assessment_type=data_type
+                ).all()
+            else:
+                records_db = AssessmentRecord.query.filter_by(
+                    semester_id=semester_id, section_id=section.id, assessment_type=data_type
+                ).all()
             for r in records_db:
                 existing_keys.add((r.student_id, r.subject_id))
         elif data_type == "SEMESTER_RESULT":
-            records_db = SemesterResult.query.filter_by(semester_id=semester_id, section_id=section_id).all()
+            if is_overall:
+                records_db = SemesterResult.query.filter_by(semester_id=semester_id).all()
+            else:
+                records_db = SemesterResult.query.filter_by(semester_id=semester_id, section_id=section.id).all()
             for r in records_db:
                 existing_keys.add((r.student_id, r.subject_id))
 
@@ -739,7 +759,7 @@ class IngestionService:
 
             row_errors = []
 
-            # 2. Student Check
+            # 2. Student & Section Check
             if not roll:
                 row_errors.append(f"Row {row_num}: Missing Student Roll Number.")
                 student = None
@@ -750,15 +770,32 @@ class IngestionService:
                 student = None
             else:
                 student = student_by_roll[roll]
-                # Consistency check: does student belong to the selected section?
-                if student.current_section_id and student.current_section and student.current_section.name != section.name:
-                    row_errors.append(
-                        f"Row {row_num}: Student '{roll}' belongs to Section '{student.current_section.name if student.current_section else 'Unknown'}', not the selected Section '{section.name}'. Silent cross-section movement is forbidden."
-                    )
-                elif file_sec and file_sec != section.name.upper():
-                    row_errors.append(
-                        f"Row {row_num}: File specifies Section '{file_sec}', which contradicts the selected Section '{section.name}'."
-                    )
+                if is_overall:
+                    # In Overall Result upload, resolve the student's section automatically across A, B, C!
+                    target_sec = None
+                    if file_sec and file_sec in sec_by_name:
+                        target_sec = sec_by_name[file_sec]
+                    elif student.current_section_id and student.current_section_id in sec_by_id:
+                        target_sec = sec_by_id[student.current_section_id]
+                    elif student.current_section and student.current_section.name.upper() in sec_by_name:
+                        target_sec = sec_by_name[student.current_section.name.upper()]
+                    elif semester_sections:
+                        target_sec = semester_sections[0]
+
+                    rec["section_id"] = target_sec.id if target_sec else None
+                    rec["section_name"] = target_sec.name if target_sec else (file_sec or "A")
+                else:
+                    # Section-wise consistency check (strictly enforced for Attendance)
+                    if student.current_section_id and student.current_section and student.current_section.name != section.name:
+                        row_errors.append(
+                            f"Row {row_num}: Student '{roll}' belongs to Section '{student.current_section.name if student.current_section else 'Unknown'}', not the selected Section '{section.name}'. Silent cross-section movement is forbidden."
+                        )
+                    elif file_sec and file_sec != section.name.upper():
+                        row_errors.append(
+                            f"Row {row_num}: File specifies Section '{file_sec}', which contradicts the selected Section '{section.name}'."
+                        )
+                    rec["section_id"] = section.id
+                    rec["section_name"] = section.name
 
             # 3. Subject Check (Extract directly from uploaded CSV/Excel)
             if not subj_code:
@@ -979,17 +1016,25 @@ class IngestionService:
                             ).delete()
                         replaced_count += 1
 
+            is_overall = (not section_id or str(section_id).strip().upper() in ["OVERALL", "ALL", "NONE", ""])
+            effective_section_id = None if is_overall else section_id
+
             for rec in valid_records:
                 is_dup = rec.get("is_duplicate", False)
                 if is_dup and duplicate_strategy == "SKIP":
                     skipped_count += 1
                     continue
 
+                rec_sec_id = rec.get("section_id") or effective_section_id
+                if not rec_sec_id:
+                    stu_temp = Student.query.get(rec["student_id"])
+                    rec_sec_id = stu_temp.current_section_id if stu_temp else None
+
                 if data_type == "ATTENDANCE":
                     # If replacing, record was deleted above; create fresh
                     att = AttendanceRecord(
                         student_id=rec["student_id"],
-                        section_id=section_id,
+                        section_id=rec_sec_id,
                         subject_id=rec["subject_id"],
                         semester_id=semester_id,
                         percentage=rec["percentage"],
@@ -1002,7 +1047,7 @@ class IngestionService:
                 elif data_type in ["MID_1", "MID_2"]:
                     asm = AssessmentRecord(
                         student_id=rec["student_id"],
-                        section_id=section_id,
+                        section_id=rec_sec_id,
                         subject_id=rec["subject_id"],
                         semester_id=semester_id,
                         assessment_type=data_type,
@@ -1016,7 +1061,7 @@ class IngestionService:
                 elif data_type == "SEMESTER_RESULT":
                     res = SemesterResult(
                         student_id=rec["student_id"],
-                        section_id=section_id,
+                        section_id=rec_sec_id,
                         subject_id=rec["subject_id"],
                         semester_id=semester_id,
                         internal_marks=rec.get("internal_marks"),
@@ -1038,7 +1083,7 @@ class IngestionService:
                             summary = StudentSemesterSummary(
                                 student_id=rec["student_id"],
                                 semester_id=semester_id,
-                                section_id=section_id,
+                                section_id=rec_sec_id,
                                 sgpa=rec.get("sgpa"),
                                 cgpa=rec.get("cgpa"),
                                 is_official=True,
@@ -1049,6 +1094,8 @@ class IngestionService:
                                 summary.sgpa = rec.get("sgpa")
                             if rec.get("cgpa") is not None:
                                 summary.cgpa = rec.get("cgpa")
+                            if rec_sec_id:
+                                summary.section_id = rec_sec_id
 
             # Record Upload History
             history = UploadHistory(
@@ -1057,7 +1104,7 @@ class IngestionService:
                 batch_id=batch_id,
                 academic_year_id=academic_year_id,
                 semester_id=semester_id,
-                section_id=section_id,
+                section_id=effective_section_id,
                 data_type=data_type,
                 total_rows=len(valid_records) + skipped_count,
                 valid_rows=imported_count + skipped_count,
@@ -1069,6 +1116,7 @@ class IngestionService:
                     "imported": imported_count,
                     "replaced": replaced_count,
                     "skipped": skipped_count,
+                    "is_overall": is_overall,
                 }),
             )
             db.session.add(history)

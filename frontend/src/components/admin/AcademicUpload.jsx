@@ -92,10 +92,14 @@ export default function AcademicUpload({ initialContext, onUploadSuccess }) {
     }
     api.getSections(selectedSemester).then((secs) => {
       setSections(secs);
-      if (secs.length > 0) {
-        setSelectedSection(secs[0].id);
+      if (dataType === 'ATTENDANCE') {
+        if (secs.length > 0) {
+          setSelectedSection(secs[0].id);
+        } else {
+          setSelectedSection('');
+        }
       } else {
-        setSelectedSection('');
+        setSelectedSection('OVERALL');
       }
     }).catch(console.error);
   }, [selectedSemester]);
@@ -297,7 +301,34 @@ export default function AcademicUpload({ initialContext, onUploadSuccess }) {
           </div>
 
           <div className="form-group">
-            <label>Section</label>
+            <label>Data Assessment Type</label>
+            <select
+              value={dataType}
+              onChange={(e) => {
+                const newType = e.target.value;
+                setDataType(newType);
+                setValidationReport(null);
+                if (newType === 'ATTENDANCE') {
+                  if (selectedSection === 'OVERALL' && sections.length > 0) {
+                    setSelectedSection(sections[0].id);
+                  }
+                } else {
+                  setSelectedSection('OVERALL');
+                }
+              }}
+              className="form-select"
+            >
+              <option value="ATTENDANCE">Attendance (Section-Wise: A, B, C)</option>
+              <option value="SEMESTER_RESULT">Semester Result (Overall Year: A, B, C)</option>
+              <option value="MID_1">Mid-1 Result (Overall Year: A, B, C)</option>
+              <option value="MID_2">Mid-2 Result (Overall Year: A, B, C)</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>
+              {dataType === 'ATTENDANCE' ? 'Section (Required — Section-Wise)' : 'Section Scope'}
+            </label>
             <select
               value={selectedSection}
               onChange={(e) => {
@@ -306,29 +337,20 @@ export default function AcademicUpload({ initialContext, onUploadSuccess }) {
               }}
               className="form-select"
             >
+              {dataType !== 'ATTENDANCE' && (
+                <option value="OVERALL">Overall Year (All Sections — A, B, C)</option>
+              )}
               {sections.map((sec) => (
                 <option key={sec.id} value={sec.id}>
-                  Section {sec.name}
+                  Section {sec.name} {dataType !== 'ATTENDANCE' ? 'only' : ''}
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="form-group">
-            <label>Data Assessment Type</label>
-            <select
-              value={dataType}
-              onChange={(e) => {
-                setDataType(e.target.value);
-                setValidationReport(null);
-              }}
-              className="form-select"
-            >
-              <option value="ATTENDANCE">Attendance (Subject-Wise %)</option>
-              <option value="MID_1">Mid-1 Result</option>
-              <option value="MID_2">Mid-2 Result</option>
-              <option value="SEMESTER_RESULT">Semester Result (Grades & SGPA)</option>
-            </select>
+            <span style={{ display: 'block', marginTop: '4px', fontSize: '0.75rem', color: dataType === 'ATTENDANCE' ? '#38bdf8' : '#a78bfa' }}>
+              {dataType === 'ATTENDANCE'
+                ? '📌 Attendance is Section-Wise: select Section A, B, or C for this file.'
+                : '📌 Result is Overall Year: spreadsheet covers all sections (A, B, C) together.'}
+            </span>
           </div>
         </div>
       </div>
