@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   Layers,
   CheckCircle2,
+  BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -19,10 +20,11 @@ import AcademicUpload from './AcademicUpload';
 import StudentDirectory from './StudentDirectory';
 import SubjectManager from './SubjectManager';
 import UploadHistoryView from './UploadHistoryView';
+import AcademicAnalytics from '../analytics/AcademicAnalytics';
 
-export default function HodDashboard({ onBackToPublic }) {
+export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }) {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [batches, setBatches] = useState([]);
   const [uploadContext, setUploadContext] = useState(null);
 
@@ -74,15 +76,32 @@ export default function HodDashboard({ onBackToPublic }) {
         <div className="container hod-nav-inner">
           <button
             className={`nav-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
+            onClick={() => {
+              setActiveTab('overview');
+              window.location.hash = '#hod/dashboard';
+            }}
           >
             <LayoutDashboard size={16} />
             <span>Overview & Availability</span>
           </button>
 
           <button
+            className={`nav-tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('analytics');
+              window.location.hash = '#hod/analytics';
+            }}
+          >
+            <BarChart3 size={16} />
+            <span>Academic Analytics</span>
+          </button>
+
+          <button
             className={`nav-tab-btn ${activeTab === 'upload' ? 'active' : ''}`}
-            onClick={() => setActiveTab('upload')}
+            onClick={() => {
+              setActiveTab('upload');
+              window.location.hash = '#hod/upload';
+            }}
           >
             <UploadCloud size={16} />
             <span>Upload Academic Data</span>
@@ -90,7 +109,10 @@ export default function HodDashboard({ onBackToPublic }) {
 
           <button
             className={`nav-tab-btn ${activeTab === 'students' ? 'active' : ''}`}
-            onClick={() => setActiveTab('students')}
+            onClick={() => {
+              setActiveTab('students');
+              window.location.hash = '#hod/students';
+            }}
           >
             <Users size={16} />
             <span>Students Directory</span>
@@ -98,7 +120,10 @@ export default function HodDashboard({ onBackToPublic }) {
 
           <button
             className={`nav-tab-btn ${activeTab === 'subjects' ? 'active' : ''}`}
-            onClick={() => setActiveTab('subjects')}
+            onClick={() => {
+              setActiveTab('subjects');
+              window.location.hash = '#hod/subjects';
+            }}
           >
             <BookOpen size={16} />
             <span>Curriculum Subjects</span>
@@ -106,7 +131,10 @@ export default function HodDashboard({ onBackToPublic }) {
 
           <button
             className={`nav-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-            onClick={() => setActiveTab('history')}
+            onClick={() => {
+              setActiveTab('history');
+              window.location.hash = '#hod/history';
+            }}
           >
             <History size={16} />
             <span>Upload Audit History</span>
@@ -164,6 +192,10 @@ export default function HodDashboard({ onBackToPublic }) {
               onNavigateToUpload={handleNavigateToUpload}
             />
           </div>
+        )}
+
+        {activeTab === 'analytics' && (
+          <AcademicAnalytics batches={batches} />
         )}
 
         {activeTab === 'upload' && (

@@ -16,6 +16,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { api } from '../../services/api';
+import StudentAnalytics from '../analytics/StudentAnalytics';
 
 export default function StudentDirectory({ batches }) {
   const [students, setStudents] = useState([]);
@@ -26,6 +27,7 @@ export default function StudentDirectory({ batches }) {
   const [selectedSection, setSelectedSection] = useState('');
   const [sections, setSections] = useState([]);
   const [page, setPage] = useState(1);
+  const [profileTab, setProfileTab] = useState('records');
   const limit = 25;
 
   // Selected Student Profile Modal/Drawer State
@@ -74,6 +76,7 @@ export default function StudentDirectory({ batches }) {
   // Open Student Detail
   const handleViewProfile = (studentId) => {
     setActiveStudentId(studentId);
+    setProfileTab('records');
     setLoadingProfile(true);
     api.getStudentDetail(studentId).then((data) => {
       setStudentProfile(data);
@@ -260,8 +263,28 @@ export default function StudentDirectory({ batches }) {
               </button>
             </div>
 
+            {/* Sub-tab navigation between Raw Records and Academic Analytics */}
+            <div className="profile-tabs-header">
+              <button
+                className={`profile-subtab-btn ${profileTab === 'records' ? 'active' : ''}`}
+                onClick={() => setProfileTab('records')}
+              >
+                <FileText size={14} />
+                <span>Verified Raw Records</span>
+              </button>
+              <button
+                className={`profile-subtab-btn ${profileTab === 'analytics' ? 'active' : ''}`}
+                onClick={() => setProfileTab('analytics')}
+              >
+                <Award size={14} />
+                <span>Academic Analytics & Trajectory</span>
+              </button>
+            </div>
+
             <div className="modal-body profile-body">
-              {loadingProfile ? (
+              {profileTab === 'analytics' ? (
+                <StudentAnalytics studentId={activeStudentId} />
+              ) : loadingProfile ? (
                 <div className="text-center py-10">
                   <RefreshCw size={24} className="spin text-primary inline" />
                   <p className="mt-2 text-muted">Retrieving verified academic records...</p>

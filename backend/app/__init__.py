@@ -6,7 +6,9 @@ from app.api.auth_bp import auth_bp
 from app.api.public_bp import public_bp
 from app.api.academic_bp import academic_bp
 from app.api.uploads_bp import uploads_bp
+from app.api.analytics_bp import analytics_bp
 from app.utils.response import api_error, api_response
+
 
 
 def create_app(config_name=None):
@@ -47,6 +49,8 @@ def create_app(config_name=None):
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
     app.register_blueprint(academic_bp)
     app.register_blueprint(uploads_bp)
+    app.register_blueprint(analytics_bp)
+
 
 
     # System Health Check

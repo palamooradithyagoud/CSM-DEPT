@@ -230,5 +230,55 @@ export const api = {
     const res = await request(`/results${query ? `?${query}` : ''}`);
     return res.data || [];
   },
+
+  // ==========================================
+  // PHASE 3: ACADEMIC ANALYTICS ENDPOINTS
+  // ==========================================
+
+  getAnalyticsOverview: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/analytics/overview${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
+  getSectionAnalytics: async (semesterId) => {
+    const res = await request(`/analytics/sections?semester_id=${semesterId}`);
+    return res.data;
+  },
+
+  getSubjectAnalytics: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/analytics/subjects${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
+  getSemesterComparison: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/analytics/semester-comparison${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
+  getStudentAnalytics: async (studentId) => {
+    const res = await request(`/analytics/student/${studentId}`);
+    return res.data;
+  },
+
+  getStudentTrajectory: async (studentId) => {
+    const res = await request(`/analytics/student/${studentId}/trajectory`);
+    return res.data;
+  },
+
+  getAttendancePerformance: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/analytics/attendance-performance${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
+  getGradeDistribution: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/analytics/grades${query ? `?${query}` : ''}`);
+    return res.data;
+  },
 };
+
 

@@ -72,13 +72,20 @@ export default function App() {
     loadPublicData();
   }, []);
 
-  // Listen for hash changes (e.g. #hod/login or #hod/dashboard)
+  // Listen for hash changes (e.g. #hod/login or #hod/dashboard or #hod/analytics)
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash;
       if (hash === '#hod/login' || hash === '#login') {
         setIsLoginModalOpen(true);
-      } else if (hash === '#hod/dashboard') {
+      } else if (
+        hash === '#hod/dashboard' ||
+        hash === '#hod/analytics' ||
+        hash === '#hod/upload' ||
+        hash === '#hod/students' ||
+        hash === '#hod/subjects' ||
+        hash === '#hod/history'
+      ) {
         if (isAuthenticated) {
           setCurrentView('admin');
         } else {
@@ -97,10 +104,21 @@ export default function App() {
     window.location.hash = '#hod/dashboard';
   };
 
+  const getInitialTab = () => {
+    const hash = window.location.hash;
+    if (hash === '#hod/analytics') return 'analytics';
+    if (hash === '#hod/upload') return 'upload';
+    if (hash === '#hod/students') return 'students';
+    if (hash === '#hod/subjects') return 'subjects';
+    if (hash === '#hod/history') return 'history';
+    return 'overview';
+  };
+
   // If viewing admin workspace and authenticated
   if (currentView === 'admin' && isAuthenticated) {
     return (
       <HodDashboard
+        initialTab={getInitialTab()}
         onBackToPublic={() => {
           setCurrentView('public');
           window.location.hash = '#overview';
