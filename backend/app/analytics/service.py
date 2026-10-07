@@ -11,14 +11,35 @@ from app.models.academic import (
 from app.analytics.aggregations import AnalyticsAggregations
 from app.analytics.comparisons import AnalyticsComparisons
 from app.analytics.correlation import AnalyticsCorrelation
+from app.analytics.leaderboard import AnalyticsLeaderboard
 
 
 class AnalyticsService:
     """
     Main Academic Analytics Service Facade.
     Coordinates KPI aggregations, section comparisons, longitudinal progression,
-    attendance-performance correlation, and individual student trajectory analytics.
+    attendance-performance correlation, individual student trajectory analytics,
+    and student academic leaderboards.
     """
+
+    @classmethod
+    def get_leaderboard(
+        cls,
+        batch_id=None,
+        academic_year_id=None,
+        section_id=None,
+        view_mode="cumulative",
+        limit=100,
+        search=None,
+    ):
+        return AnalyticsLeaderboard.get_leaderboard(
+            batch_id=batch_id,
+            academic_year_id=academic_year_id,
+            section_id=section_id,
+            view_mode=view_mode,
+            limit=limit,
+            search=search,
+        )
 
     @classmethod
     def get_overview(cls, batch_id=None, academic_year_id=None, semester_id=None, section_id=None):

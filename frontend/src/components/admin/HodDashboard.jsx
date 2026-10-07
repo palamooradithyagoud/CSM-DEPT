@@ -14,6 +14,7 @@ import {
   BarChart3,
   AlertTriangle,
   FileText,
+  Trophy,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -25,6 +26,7 @@ import UploadHistoryView from './UploadHistoryView';
 import AcademicAnalytics from '../analytics/AcademicAnalytics';
 import AcademicInsights from '../insights/AcademicInsights';
 import ReportsHub from '../reports/ReportsHub';
+import StudentLeaderboard from './StudentLeaderboard';
 
 export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }) {
   const { user, logout } = useAuth();
@@ -87,6 +89,18 @@ export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }
           >
             <LayoutDashboard size={16} />
             <span>Overview & Availability</span>
+          </button>
+
+          <button
+            id="hod-nav-leaderboard"
+            className={`nav-tab-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('leaderboard');
+              window.location.hash = '#hod/leaderboard';
+            }}
+          >
+            <Trophy size={16} />
+            <span>Student Leaderboard</span>
           </button>
 
           <button
@@ -219,6 +233,10 @@ export default function HodDashboard({ onBackToPublic, initialTab = 'overview' }
               onNavigateToUpload={handleNavigateToUpload}
             />
           </div>
+        )}
+
+        {activeTab === 'leaderboard' && (
+          <StudentLeaderboard batches={batches} />
         )}
 
         {activeTab === 'analytics' && (

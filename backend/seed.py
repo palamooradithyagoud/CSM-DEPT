@@ -399,20 +399,6 @@ with app.app_context():
                 except Exception as e:
                     print(f"Notice: Could not parse {rel_path}: {e}")
 
-        # Fallback if roster files were not located
-        if total_students_seeded == 0:
-            for i in range(1, 66):
-                roll = f"25881A66{i:02d}"
-                st = Student(
-                    roll_number=roll,
-                    name=f"Student {roll}",
-                    batch_id=batch.id,
-                    current_section_id=section_map.get((1, "A")).id if section_map.get((1, "A")) else None,
-                    is_active=True,
-                )
-                db.session.add(st)
-                total_students_seeded += 1
-
         db.session.flush()
         print(f"Seeded {total_students_seeded} Students for Batch 2025-2029 across Sections A, B, C.")
 

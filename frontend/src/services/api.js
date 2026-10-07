@@ -312,6 +312,12 @@ export const api = {
     return res.data;
   },
 
+  getLeaderboard: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await request(`/analytics/leaderboard${query ? `?${query}` : ''}`);
+    return res.data;
+  },
+
   // ==========================================
   // PHASE 4: PROBLEM IDENTIFICATION & INSIGHTS
   // ==========================================

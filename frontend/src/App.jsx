@@ -80,6 +80,7 @@ export default function App() {
         setIsLoginModalOpen(true);
       } else if (
         hash === '#hod/dashboard' ||
+        hash === '#hod/leaderboard' ||
         hash === '#hod/analytics' ||
         hash === '#hod/insights' ||
         hash === '#hod/reports' ||
@@ -108,6 +109,7 @@ export default function App() {
 
   const getInitialTab = () => {
     const hash = window.location.hash;
+    if (hash === '#hod/leaderboard') return 'leaderboard';
     if (hash === '#hod/reports') return 'reports';
     if (hash === '#hod/insights') return 'insights';
     if (hash === '#hod/analytics') return 'analytics';

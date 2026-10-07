@@ -183,3 +183,32 @@ def get_grade_distribution():
         return jsonify({"success": True, "data": data}), 200
     except Exception as e:
         return jsonify({"success": False, "message": f"Failed to compute grade distribution: {str(e)}"}), 500
+
+
+@analytics_bp.route("/leaderboard", methods=["GET"])
+@role_required(["ADMIN", "HOD"])
+def get_leaderboard():
+    """
+    Department Academic Leaderboard & Merit Standings.
+    Maps student performance across Semester 1, Semester 2, and cumulative CGPA.
+    Supports overall year ranking and section-wise filtering.
+    """
+    batch_id = request.args.get("batch_id")
+    academic_year_id = request.args.get("academic_year_id")
+    section_id = request.args.get("section_id")
+    view_mode = (request.args.get("view_mode") or "cumulative").lower()
+    limit = int(request.args.get("limit", 100))
+    search = request.args.get("search")
+
+    try:
+        data = AnalyticsService.get_leaderboard(
+            batch_id=batch_id,
+            academic_year_id=academic_year_id,
+            section_id=section_id,
+            view_mode=view_mode,
+            limit=limit,
+            search=search,
+        )
+        return jsonify({"success": True, "data": data}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Failed to compute leaderboard: {str(e)}"}), 500

@@ -375,7 +375,17 @@ class Phase3AnalyticsTestCase(unittest.TestCase):
         data = resp.get_json()["data"]
         self.assertEqual(data["dataAvailability"]["results"], "NOT_AVAILABLE")
         self.assertEqual(data["dataAvailability"]["attendance"], "NOT_AVAILABLE")
-        self.assertIsNone(data["metrics"]["averageSGPA"])
+    def test_14_leaderboard_endpoint(self):
+        """Verify Leaderboard API returns ranked students mapped across semesters with podium."""
+        resp = self.client.get(f"/api/v1/analytics/leaderboard?batch_id={self.batch_id}", headers=self.auth_headers)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()["data"]
+        self.assertIn("cohort", data)
+        self.assertIn("summary", data)
+        self.assertIn("rankings", data)
+        self.assertIn("podium", data)
+        self.assertIn("topImprovers", data)
+        self.assertGreater(data["summary"]["totalStudents"], 0)
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@
  */
 
 export const SUPABASE_CONFIG = {
-  url: import.meta.env.VITE_SUPABASE_URL || 'https://wehvepjchdclhwsaxadg.supabase.co',
+  url: import.meta.env.VITE_SUPABASE_URL || 'https://wehwepjchdclhwsaxadg.supabase.co',
   anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
   publishableKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '',
 };

@@ -717,8 +717,9 @@ class IngestionService:
         # Also map short names for flexibility
         subject_by_short = {s.short_name.upper(): s for s in semester_subjects if s.short_name}
 
-        # Track dynamically extracted subjects from uploaded file
+        # Track dynamically extracted subjects & students from uploaded file
         newly_extracted_subjects = {}
+        newly_extracted_students = {}
 
         # Cache Existing Database Records for Duplicate Check
         existing_keys = set()
@@ -759,17 +760,45 @@ class IngestionService:
 
             row_errors = []
 
-            # 2. Student & Section Check
+            # 2. Student & Section Check (Dynamically extract student if not yet registered)
             if not roll:
                 row_errors.append(f"Row {row_num}: Missing Student Roll Number.")
                 student = None
-            elif roll not in student_by_roll:
-                row_errors.append(
-                    f"Row {row_num}: Student with Roll Number '{roll}' is not registered in Batch '{batch.name}'."
-                )
-                student = None
             else:
-                student = student_by_roll[roll]
+                if roll in student_by_roll:
+                    student = student_by_roll[roll]
+                else:
+                    # Dynamically extract student from uploaded spreadsheet
+                    raw_stu_name = rec.get("student_name") or f"Student {roll}"
+                    auto_sec = None
+                    if is_overall:
+                        if file_sec and file_sec in sec_by_name:
+                            auto_sec = sec_by_name[file_sec]
+                        elif semester_sections:
+                            auto_sec = semester_sections[0]
+                    else:
+                        auto_sec = section
+
+                    sec_id_val = auto_sec.id if auto_sec else None
+                    sec_name_val = auto_sec.name if auto_sec else (file_sec or "A")
+
+                    class _StudentProxy:
+                        def __init__(self, r, n, s_id, s_name):
+                            self.id = f"auto_{r}"
+                            self.roll_number = r
+                            self.name = n
+                            self.current_section_id = s_id
+                            self.current_section = type("SecProxy", (), {"id": s_id, "name": s_name})()
+
+                    student = _StudentProxy(roll, raw_stu_name, sec_id_val, sec_name_val)
+                    student_by_roll[roll] = student
+                    newly_extracted_students[roll] = {
+                        "roll_number": roll,
+                        "name": raw_stu_name,
+                        "section_id": sec_id_val,
+                        "section_name": sec_name_val,
+                    }
+
                 if is_overall:
                     # In Overall Result upload, resolve the student's section automatically across A, B, C!
                     target_sec = None
@@ -928,6 +957,7 @@ class IngestionService:
             "valid_records": valid_records,
             "preview_rows": preview_rows,
             "extracted_subjects": list(newly_extracted_subjects.values()),
+            "extracted_students": list(newly_extracted_students.values()),
         }
 
     @classmethod
@@ -959,7 +989,35 @@ class IngestionService:
 
         # Execute inside a transaction savepoint / block
         try:
-            # 0. Ensure all subjects extracted from uploaded file are registered in DB
+            is_overall = (not section_id or str(section_id).strip().upper() in ["OVERALL", "ALL", "NONE", ""])
+            effective_section_id = None if is_overall else section_id
+
+            # 0a. Ensure all students extracted from uploaded file are registered in DB
+            existing_batch_students = {s.roll_number.upper(): s for s in Student.query.filter_by(batch_id=batch_id).all()}
+            for rec in valid_records:
+                roll = rec.get("roll_number", "").strip().upper()
+                if not roll:
+                    continue
+                if roll in existing_batch_students:
+                    stu_obj = existing_batch_students[roll]
+                else:
+                    raw_name = rec.get("student_name") or f"Student {roll}"
+                    sec_for_stu = rec.get("section_id") or effective_section_id
+                    stu_obj = Student(
+                        roll_number=roll,
+                        name=raw_name,
+                        batch_id=batch_id,
+                        current_section_id=sec_for_stu,
+                        email=f"{roll.lower()}@department.edu",
+                        is_active=True,
+                    )
+                    db.session.add(stu_obj)
+                    db.session.flush()
+                    existing_batch_students[roll] = stu_obj
+
+                rec["student_id"] = stu_obj.id
+
+            # 0b. Ensure all subjects extracted from uploaded file are registered in DB
             existing_sem_subjects = {s.code.upper(): s for s in Subject.query.filter_by(semester_id=semester_id).all()}
             for s in Subject.query.filter_by(semester_id=semester_id).all():
                 if s.short_name:
@@ -1015,9 +1073,6 @@ class IngestionService:
                                 student_id=s_id, semester_id=semester_id, subject_id=sub_id
                             ).delete()
                         replaced_count += 1
-
-            is_overall = (not section_id or str(section_id).strip().upper() in ["OVERALL", "ALL", "NONE", ""])
-            effective_section_id = None if is_overall else section_id
 
             for rec in valid_records:
                 is_dup = rec.get("is_duplicate", False)
