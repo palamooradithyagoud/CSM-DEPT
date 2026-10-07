@@ -15,6 +15,7 @@ app = create_app("development")
 
 with app.app_context():
     print("Initializing database tables...")
+    db.drop_all()
     db.create_all()
 
     # 1. Seed Administrative & HOD Users
@@ -363,102 +364,7 @@ with app.app_context():
         db.session.flush()
         print("Created Configurable Sections (A, B, C) for all Semesters 1 through 8.")
 
-        # Seed Distinct Curriculum Subjects for each semester (2 semesters per year)
-        curriculum_by_sem = {
-            1: [
-                {"code": "A9001", "name": "Matrices and Calculus", "short_name": "MAC", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9501", "name": "Programming for Problem Solving", "short_name": "PPS", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9502", "name": "Programming for Problem Solving Lab", "short_name": "PPSL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9302", "name": "Engineering Workshop", "short_name": "EW", "credits": 2.5, "subject_type": "LAB"},
-                {"code": "A9021", "name": "Critical Thinking & Design Thinking", "short_name": "CCDT", "credits": 2.0, "subject_type": "THEORY"},
-                {"code": "A9007", "name": "Engineering Physics", "short_name": "EP", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9008", "name": "Engineering Physics Lab", "short_name": "EPL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9204", "name": "Basic Electrical Engineering", "short_name": "BEE", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9801", "name": "Foundations of Data Science", "short_name": "FDS", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9205", "name": "Basic Electrical Engineering Lab", "short_name": "BEEL", "credits": 1.5, "subject_type": "LAB"},
-            ],
-            2: [
-                {"code": "A9003", "name": "Linear Algebra and Advanced Calculus", "short_name": "LAAC", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9004", "name": "Applied Chemistry", "short_name": "AC", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9005", "name": "Applied Chemistry Lab", "short_name": "ACL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9505", "name": "Python Programming for Problem Solving", "short_name": "PPPS", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9506", "name": "Python Programming Lab", "short_name": "PYLAB", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9013", "name": "English for Skill Enhancement", "short_name": "ESE", "credits": 2.0, "subject_type": "THEORY"},
-                {"code": "A9014", "name": "English Language & Communication Skills Lab", "short_name": "ELCS", "credits": 1.0, "subject_type": "LAB"},
-                {"code": "A9206", "name": "Electronic Devices and Circuits", "short_name": "EDC", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9207", "name": "Electronic Devices and Circuits Lab", "short_name": "EDCL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9023", "name": "Environmental Science and Ecology", "short_name": "EVS", "credits": 2.0, "subject_type": "THEORY"},
-            ],
-            3: [
-                {"code": "A9002", "name": "Ordinary Differential Equations and Calculus of Variations", "short_name": "ODECV", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9009", "name": "Engineering Chemistry", "short_name": "EC", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9011", "name": "Engineering Science Elective", "short_name": "ESE", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9503", "name": "Data Structures using C++", "short_name": "DS", "credits": 4.0, "subject_type": "THEORY"},
-                {"code": "A9402", "name": "Digital Electronics", "short_name": "DE", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9010", "name": "Engineering Chemistry Lab", "short_name": "ECL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9012", "name": "Engineering Science Elective Lab", "short_name": "ESEL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9504", "name": "Data Structures Lab", "short_name": "DSL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9304", "name": "Computer Aided Engineering Graphics", "short_name": "CAEG", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9022", "name": "Professional Development & Design", "short_name": "PDD", "credits": 2.0, "subject_type": "THEORY"},
-            ],
-            4: [
-                {"code": "A9006", "name": "Discrete Mathematics and Graph Theory", "short_name": "DMGT", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9507", "name": "Database Management Systems", "short_name": "DBMS", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9508", "name": "Database Management Systems Lab", "short_name": "DBMSL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9509", "name": "Operating Systems", "short_name": "OS", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9510", "name": "Operating Systems Lab", "short_name": "OSL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9511", "name": "Computer Organization and Architecture", "short_name": "COA", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9512", "name": "Object-Oriented Programming through Java", "short_name": "JAVA", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9513", "name": "Java Programming Lab", "short_name": "JAVAL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9514", "name": "Design and Analysis of Algorithms", "short_name": "DAA", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9024", "name": "Constitution of India", "short_name": "COI", "credits": 2.0, "subject_type": "THEORY"},
-            ],
-            5: [
-                {"code": "A9515", "name": "Computer Networks", "short_name": "CN", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9516", "name": "Formal Languages and Automata Theory", "short_name": "FLAT", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9802", "name": "Machine Learning", "short_name": "ML", "credits": 4.0, "subject_type": "THEORY"},
-                {"code": "A9803", "name": "Machine Learning Lab", "short_name": "MLL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9517", "name": "Software Engineering", "short_name": "SE", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9518", "name": "Web Technologies", "short_name": "WT", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9519", "name": "Web Technologies Lab", "short_name": "WTL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9520", "name": "Computer Networks Lab", "short_name": "CNL", "credits": 1.5, "subject_type": "LAB"},
-            ],
-            6: [
-                {"code": "A9804", "name": "Artificial Intelligence", "short_name": "AI", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9805", "name": "Artificial Intelligence Lab", "short_name": "AIL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9521", "name": "Compiler Design", "short_name": "CD", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9806", "name": "Deep Learning and Neural Networks", "short_name": "DL", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9807", "name": "Deep Learning Lab", "short_name": "DLL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9522", "name": "Cloud Computing and Distributed Systems", "short_name": "CC", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9025", "name": "Intellectual Property Rights and Cyber Law", "short_name": "IPR", "credits": 2.0, "subject_type": "THEORY"},
-                {"code": "A9523", "name": "Industry Oriented Mini Project", "short_name": "MP", "credits": 2.0, "subject_type": "LAB"},
-            ],
-            7: [
-                {"code": "A9524", "name": "Cryptography and Network Security", "short_name": "CNS", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9808", "name": "Natural Language Processing", "short_name": "NLP", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9809", "name": "Big Data Analytics and Processing", "short_name": "BDA", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9525", "name": "Network Security Lab", "short_name": "NSL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9810", "name": "Big Data Analytics Lab", "short_name": "BDAL", "credits": 1.5, "subject_type": "LAB"},
-                {"code": "A9526", "name": "Professional Elective - DevOps and Agile Engineering", "short_name": "DEVOPS", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9527", "name": "Major Project Stage - I", "short_name": "PROJ1", "credits": 3.0, "subject_type": "LAB"},
-            ],
-            8: [
-                {"code": "A9811", "name": "Deep Reinforcement Learning", "short_name": "DRL", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9812", "name": "Autonomous Intelligent Systems & Robotics", "short_name": "AIS", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9026", "name": "Management Fundamentals & Entrepreneurship", "short_name": "MFE", "credits": 3.0, "subject_type": "THEORY"},
-                {"code": "A9528", "name": "Major Project Stage - II / Capstone Internship", "short_name": "PROJ2", "credits": 10.0, "subject_type": "LAB"},
-            ],
-        }
-
-        total_subjects = 0
-        for sem in semesters:
-            sub_list = curriculum_by_sem.get(sem.semester_number, [])
-            for sub_data in sub_list:
-                db.session.add(Subject(semester_id=sem.id, **sub_data))
-                total_subjects += 1
-        print(f"Seeded {total_subjects} distinct curriculum subjects across all 8 semesters (2 semesters per year).")
-
-        # Seed Students from Department Roster
+        # 4. Seed Students from Department Roster
         import openpyxl
         roster_files = [
             ("A", os.path.join("..", "Students data", "ATTENDENCE", "7. CSM-I B.Tech. II _A.xlsx")),
@@ -468,7 +374,7 @@ with app.app_context():
 
         total_students_seeded = 0
         for sec_letter, rel_path in roster_files:
-            target_sec = section_map.get((3, sec_letter))
+            target_sec = section_map.get((1, sec_letter))
             if os.path.exists(rel_path):
                 try:
                     wb = openpyxl.load_workbook(rel_path, data_only=True)
@@ -501,13 +407,107 @@ with app.app_context():
                     roll_number=roll,
                     name=f"Student {roll}",
                     batch_id=batch.id,
-                    current_section_id=section_map.get((3, "A")).id if section_map.get((3, "A")) else None,
+                    current_section_id=section_map.get((1, "A")).id if section_map.get((1, "A")) else None,
                     is_active=True,
                 )
                 db.session.add(st)
                 total_students_seeded += 1
 
+        db.session.flush()
         print(f"Seeded {total_students_seeded} Students for Batch 2025-2029 across Sections A, B, C.")
+
+        # 5. Extract Subjects Directly from Uploaded Spreadsheets via IngestionService
+        print("Extracting Subjects & Ingesting Data from College Spreadsheets...")
+        from app.services.ingestion_service import IngestionService
+
+        ay1 = academic_years[0]  # 1st Year
+        sem1 = semesters[0]  # Semester 1
+        sem2 = semesters[1]  # Semester 2
+
+        # Ingest Semester 1 Results (Dynamically extracts 10 subjects from RESULT 1-1.xlsx)
+        res_1_path = os.path.join("..", "Students data", "sem result", "RESULT 1-1.xlsx")
+        if os.path.exists(res_1_path):
+            with open(res_1_path, "rb") as f:
+                rows, _ = IngestionService.parse_file_to_rows(f, "RESULT 1-1.xlsx")
+                records = IngestionService.normalize_tabular_data(rows, "SEMESTER_RESULT")
+                for sec_let in ["A", "B", "C"]:
+                    sec_obj = section_map.get((1, sec_let))
+                    sec_recs = [r for r in records if r.get("section_name") == sec_let]
+                    if sec_recs and sec_obj:
+                        val = IngestionService.validate_dataset(
+                            sec_recs, batch.id, ay1.id, sem1.id, sec_obj.id, "SEMESTER_RESULT"
+                        )
+                        if val["valid_records"]:
+                            IngestionService.execute_transactional_import(
+                                val["valid_records"], batch.id, ay1.id, sem1.id, sec_obj.id,
+                                "SEMESTER_RESULT", "REPLACE", "seed@college.edu", "RESULT 1-1.xlsx"
+                            )
+            sem1_count = Subject.query.filter_by(semester_id=sem1.id).count()
+            print(f"Extracted {sem1_count} Subjects for Semester 1 directly from RESULT 1-1.xlsx.")
+
+        # Ingest Semester 2 Results (Dynamically extracts 10 subjects from Results 1-2.xls)
+        res_2_path = os.path.join("..", "Students data", "sem result", "Results 1-2.xls")
+        if os.path.exists(res_2_path):
+            with open(res_2_path, "rb") as f:
+                rows, _ = IngestionService.parse_file_to_rows(f, "Results 1-2.xls")
+                records = IngestionService.normalize_tabular_data(rows, "SEMESTER_RESULT")
+                for sec_let in ["A", "B", "C"]:
+                    sec_obj = section_map.get((2, sec_let))
+                    sec_recs = [r for r in records if r.get("section_name") == sec_let]
+                    if sec_recs and sec_obj:
+                        val = IngestionService.validate_dataset(
+                            sec_recs, batch.id, ay1.id, sem2.id, sec_obj.id, "SEMESTER_RESULT"
+                        )
+                        if val["valid_records"]:
+                            IngestionService.execute_transactional_import(
+                                val["valid_records"], batch.id, ay1.id, sem2.id, sec_obj.id,
+                                "SEMESTER_RESULT", "REPLACE", "seed@college.edu", "Results 1-2.xls"
+                            )
+            sem2_count = Subject.query.filter_by(semester_id=sem2.id).count()
+            print(f"Extracted {sem2_count} Subjects for Semester 2 directly from Results 1-2.xls.")
+
+        # Ingest Semester 1 Attendance
+        att_sem1_files = [
+            ("A", os.path.join("..", "Students data", "ATTENDENCE", "I B.Tech. I Semester CSM Attendance (19.01.2026) - A.xlsx")),
+            ("B", os.path.join("..", "Students data", "ATTENDENCE", "I B.Tech. I Semester CSM Attendance (19.01.2026) - B.xlsx")),
+            ("C", os.path.join("..", "Students data", "ATTENDENCE", "I B.Tech. I Semester CSM Attendance (19.01.2026) - C.xlsx")),
+        ]
+        for sec_let, path in att_sem1_files:
+            sec_obj = section_map.get((1, sec_let))
+            if os.path.exists(path) and sec_obj:
+                with open(path, "rb") as f:
+                    rows, _ = IngestionService.parse_file_to_rows(f, os.path.basename(path))
+                    records = IngestionService.normalize_tabular_data(rows, "ATTENDANCE")
+                    val = IngestionService.validate_dataset(records, batch.id, ay1.id, sem1.id, sec_obj.id, "ATTENDANCE")
+                    if val["valid_records"]:
+                        IngestionService.execute_transactional_import(
+                            val["valid_records"], batch.id, ay1.id, sem1.id, sec_obj.id,
+                            "ATTENDANCE", "REPLACE", "seed@college.edu", os.path.basename(path)
+                        )
+
+        # Ingest Semester 2 Attendance
+        att_sem2_files = [
+            ("A", os.path.join("..", "Students data", "ATTENDENCE", "7. CSM-I B.Tech. II _A.xlsx")),
+            ("B", os.path.join("..", "Students data", "ATTENDENCE", "7. CSM-I B.Tech. II _B.xlsx")),
+            ("C", os.path.join("..", "Students data", "ATTENDENCE", "7. CSM-I B.Tech. II _C.xlsx")),
+        ]
+        for sec_let, path in att_sem2_files:
+            sec_obj = section_map.get((2, sec_let))
+            if os.path.exists(path) and sec_obj:
+                with open(path, "rb") as f:
+                    rows, _ = IngestionService.parse_file_to_rows(f, os.path.basename(path))
+                    records = IngestionService.normalize_tabular_data(rows, "ATTENDANCE")
+                    val = IngestionService.validate_dataset(records, batch.id, ay1.id, sem2.id, sec_obj.id, "ATTENDANCE")
+                    if val["valid_records"]:
+                        IngestionService.execute_transactional_import(
+                            val["valid_records"], batch.id, ay1.id, sem2.id, sec_obj.id,
+                            "ATTENDANCE", "REPLACE", "seed@college.edu", os.path.basename(path)
+                        )
+        print("Attendance ingestion completed!")
+
+        # Note: Semesters 3 through 8 have 0 dummy subjects.
+        # They will be extracted automatically when spreadsheets are uploaded for those semesters.
+        print("Semesters 3-8 are clean with 0 dummy subjects, ready for CSV/XLSX uploads.")
 
     db.session.commit()
     print("Database seeding completed successfully!")

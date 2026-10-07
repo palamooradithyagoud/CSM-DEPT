@@ -102,6 +102,7 @@ def validate_upload():
             "errors": validation_report["errors"],
             "warnings": validation_report["warnings"],
             "previewRows": validation_report["preview_rows"],
+            "extractedSubjects": validation_report.get("extracted_subjects", []),
         }), 200
 
     except ValueError as e:

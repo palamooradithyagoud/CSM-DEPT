@@ -192,8 +192,9 @@ export default function SubjectManager({ batches }) {
                 </tr>
               ) : subjects.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center empty-cell">
-                    No subjects configured for this semester yet. Use 'Add Subject' to register courses.
+                  <td colSpan="6" className="text-center empty-cell" style={{ padding: '2rem 1rem' }}>
+                    <div style={{ color: '#94a3b8', marginBottom: '6px' }}>No subjects configured for this semester yet.</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Subjects are automatically extracted from your CSV / Excel column headers when you upload files in Academic Upload, or you can manually click "+ Add Subject".</div>
                   </td>
                 </tr>
               ) : (

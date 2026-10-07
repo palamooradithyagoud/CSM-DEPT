@@ -472,6 +472,47 @@ export default function AcademicUpload({ initialContext, onUploadSuccess }) {
             </div>
           )}
 
+          {/* Extracted Subjects Section */}
+          {validationReport.extractedSubjects && validationReport.extractedSubjects.length > 0 && (
+            <div className="extracted-subjects-card" style={{
+              background: 'rgba(34, 197, 94, 0.08)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                <CheckCircle2 size={18} className="text-success" />
+                <span style={{ fontWeight: 600, color: '#4ade80' }}>
+                  Auto-Extracted Subjects ({validationReport.extractedSubjects.length})
+                </span>
+                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                  — Discovered from column headers. Will be registered into semester curriculum upon import.
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {validationReport.extractedSubjects.map((sub, idx) => (
+                  <div key={idx} style={{
+                    background: 'rgba(15, 23, 42, 0.6)',
+                    border: '1px solid rgba(51, 65, 85, 0.8)',
+                    borderRadius: '6px',
+                    padding: '4px 10px',
+                    fontSize: '0.82rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <strong style={{ color: '#38bdf8' }}>{sub.code}</strong>
+                    <span style={{ color: '#cbd5e1' }}>{sub.name}</span>
+                    <span style={{ fontSize: '0.72rem', background: 'rgba(99, 102, 241, 0.2)', color: '#a5b4fc', padding: '1px 5px', borderRadius: '4px' }}>
+                      {sub.credits} Cr • {sub.type}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Data Preview Table */}
           {previewRows.length > 0 && (
             <div className="preview-table-container">
